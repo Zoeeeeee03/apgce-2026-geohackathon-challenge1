@@ -1,0 +1,1 @@
+# apgce-2026-geohackathon-challenge1
