@@ -70,6 +70,8 @@ Structural normal fault parameters for **Well P-1** (e.g., `Fault P1-F08`, CDP 2
 
 Un-interpreted candidate wells are strictly labeled as `"Pending DUG Horizon Pick"` and `"Pending Inversion"` rather than using synthetic values, ensuring the Agentic AI only reasons over verified domain evidence.
 
+---
+
 ## 🚀 Key Technical Features & Capabilities
 
 ### 1. 📊 Interactive 3-Track Wireline Log Evidence Visualizer
