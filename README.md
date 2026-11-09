@@ -58,15 +58,15 @@ Evaluating exploration prospects traditionally requires geoscientists to spend *
 ## 🛡️ Data Grounding & Verification Standard
 To eliminate AI hallucinations and ensure complete technical transparency, **Exploration Copilot** categorizes its subsurface inputs into three grounded tiers:
 
-## 1. **Automated Real Data (100% Computed):** 
+* 1. **Automated Real Data (100% Computed):** 
 
 All wireline curve plots, sample counts, net pay intervals, and quantitative petrophysical averages (Vshale, Phitotal, Sw, Sh) are parsed directly from field `.las` files using `lasio` and `pandas`.
 
-## 2. **Visual Geological Picks (100% Grounded):** 
+* 2. **Visual Geological Picks (100% Grounded):** 
 
 Structural normal fault parameters for **Well P-1** (e.g., `Fault P1-F08`, CDP 2200–2400, 25ms TWT displacement) represent real seismic interpretations performed by our team in DUG Insight.
 
-## 3. **Zero-Hallucination Safe Fallbacks:**
+* 3. **Zero-Hallucination Safe Fallbacks:**
 
 Un-interpreted candidate wells are strictly labeled as `"Pending DUG Horizon Pick"` and `"Pending Inversion"` rather than using synthetic values, ensuring the Agentic AI only reasons over verified domain evidence.
 
