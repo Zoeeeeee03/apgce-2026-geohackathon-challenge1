@@ -193,18 +193,78 @@ if navigation_mode == "📊 Single Well Deep-Dive":
 
     st.divider()
 
-    with st.popover("💬 Click to Open Exploration Copilot AI Assistant", use_container_width=True):
-        st.markdown(f"### Exploration Copilot — Well {well_info['well_name']} Reasoning")
-        user_input = st.text_input("Ask Copilot a question regarding selected depth or properties:")
-        if user_input:
-            system_prompt = f"You are Exploration Copilot evaluating Well {well_info['well_name']}."
-            resp = client.chat.completions.create(
-                model="google/gemma-4-26B-A4B-it",
-                messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_input}],
-                temperature=0.2
-            )
-            st.markdown(resp.choices[0].message.content)
+# ==========================================
+# DIRECT AI EXPLORATION COPILOT (NO POPOVER)
+# ==========================================
+    st.subheader("🤖 Exploration Copilot — Agentic AI Assistant")
+    st.caption(f"Loaded Subsurface & Structural Context for Well **{well_info['well_name']}**")
 
+# Bounded Container Box for direct visibility
+    with st.container(border=True):
+        st.markdown("##### Select a preset query or type a custom depth question below:")
+
+    # 2 Preset Action Buttons side-by-side
+        col_b1, col_b2 = st.columns(2)
+        q1 = col_b1.button("1. Evaluate Trap & Reservoir Quality", use_container_width=True)
+        q2 = col_b2.button("2. Identify Key Geological Risks", use_container_width=True)
+
+    # Custom Depth / Property Input Field
+        user_input = st.text_input(
+            "Ask Copilot a custom question (e.g., regarding depth intervals, structural fault sealing, or LAS log properties):",
+            placeholder="e.g., What is the trapping risk between depth 2050m and 3200m?"
+    )
+
+        prompt_text = None
+        if q1:
+            prompt_text = f"Evaluate prospect potential, reservoir quality, and trapping mechanism for Well {well_info['well_name']}."
+        elif q2:
+            prompt_text = f"Identify key geological risks, structural fault integrity, and seal risks for Well {well_info['well_name']}."
+        elif user_input:
+            prompt_text = user_input
+
+    # Run Local Gemma 4 Model Inference when a button or text query is submitted
+        if prompt_text:
+            st.markdown(f"**Query Submitted:** *{prompt_text}*")
+        
+        # Ground-Truth System Prompt including Wireline + Structural Fault Picks
+            struct_data = well_info.get("structural_interpretation", {})
+            system_prompt = f"""
+            You are Exploration Copilot, an expert AI Geoscientist.
+            Evaluate Well {well_info['well_name']} using this ground truth evidence:
+        
+            - Primary Seal Context: {well_info.get('primary_seal', 'Regional Marine Shale')}
+            - Net Pay Samples: {well_info.get('net_pay_samples', 'N/A')}
+            - Pay Depth Interval: {well_info.get('pay_zone_depth', 'N/A')}
+            - Pay Zone Petrophysics: {well_info.get('pay_zone_properties', {})}
+            - Pre-Stack AVO Attributes: {well_info.get('avo_inversion', {})}
+            - DUG Insight Structural Fault Interpretation:
+              * Fault Name: {struct_data.get('fault_name', 'N/A')}
+              * Horizon Pick: {struct_data.get('horizon_pick', 'N/A')}
+              * Structural Feature: {struct_data.get('structural_feature', 'N/A')}
+              * Trapping Mechanism: {struct_data.get('trap_mechanism', 'N/A')}
+              * Structural Seal Risk: {struct_data.get('structural_risk', 'N/A')}
+
+            Always structure your response step-by-step:
+            1. 📊 Observation (Cite exact Vsh, PHIT, Sw, and fault displacement parameters)
+            2. 🧠 Geological Reasoning (Explain structural vs. stratigraphic trap logic and AVO Class)
+            3. 💡 Prospect Conclusion (Declare reservoir potential and trap validity)
+            4. ⚠️ Key Risks & Next Steps (Recommend specific actions in DUG Insight or petrophysics)
+            """
+
+            with st.spinner("Analyzing ground truth & structural evidence with Gemma 4..."):
+                try:
+                    resp = client.chat.completions.create(
+                        model="google/gemma-4-26B-A4B-it",
+                        messages=[
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": prompt_text}
+                        ],
+                        temperature=0.2
+                    )
+                    st.markdown(resp.choices[0].message.content)
+                except Exception as e:
+                    st.error(f"Error connecting to local vLLM endpoint: {e}")
+    
 
 # ==========================================
 # MODE 2: MULTI-WELL PROSPECT RANKING

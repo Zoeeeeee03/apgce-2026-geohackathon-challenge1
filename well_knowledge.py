@@ -72,8 +72,11 @@ WELL_DATABASE = {
         },
         "seismic_inversion_correlation": "High porosity sand highlight on inversion volumes.",
         "structural_interpretation": {
-            "fault_candidate": "Clean tabular horizon block",
-            "trap_mechanism": "Stratigraphic lens / isolated sand body"
+            "fault_name": "Fault P1-F08 (and associated p-1_f01..f07 fault array)",
+            "horizon_pick": "Top Reservoir Reflector (Yellow/Orange Horizon Pick at ~1650ms TWT)",
+            "structural_feature": "Extensional Normal Fault system with ~25ms TWT (~30m) vertical displacement near CDP 2200-2400",
+            "trap_mechanism": "Fault-dependent structural closure (Hanging-wall sand against down-faulted seal)",
+            "structural_risk": "Fault seal breach across fault plane and compartment leakage between parallel fault branches"
         },
         "recommended_next_action": "Determine lateral extent of thin high-porosity lens."
     },
