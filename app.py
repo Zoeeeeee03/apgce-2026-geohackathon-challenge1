@@ -122,15 +122,24 @@ if navigation_mode == "📊 Single Well Deep-Dive":
     )
     
     well_info = WELL_DATABASE[selected_well]
+    struct_info = well_info.get("structural_interpretation", {})
+    
+    # Strictly limit FULL INTEGRATION status to M-1 and P-1 only
+    is_fully_integrated = selected_well.lower() in ["m-1", "p-1"]
     
     st.header(f"Well Overview: {well_info['well_name']}")
     
+    if is_fully_integrated:
+        st.success("✅ **DATA NOTICE:** Wireline petrophysics & DUG Insight structural fault/horizon picks fully integrated.")
+    else:
+        st.info("ℹ️ **DATA NOTICE:** Wireline petrophysics & LAS log curves are fully parsed. Structural fault/horizon mapping is currently **Pending DUG Horizon Pick**.")
+
     with st.container(border=True):
         st.subheader("🌐 Overall Field Context (Entire Logged Column)")
         m1, m2, m3 = st.columns(3)
         m1.metric("Total Logged Samples", f"{well_info['total_logged_samples']:,}")
         m2.metric("Total Net Pay Samples", f"{well_info['net_pay_samples']}")
-        hc_sat_display = well_info["pay_zone_properties"].get("hydrocarbon_saturation", "67.4%")
+        hc_sat_display = well_info["pay_zone_properties"].get("hydrocarbon_saturation", "64.1%")
         m3.metric("Avg Hydrocarbon Saturation (Sh)", hc_sat_display)
         
         st.info(f"📍 **Overall Field Primary Pay Depth Range:** {well_info['pay_zone_depth']}")
@@ -141,8 +150,9 @@ if navigation_mode == "📊 Single Well Deep-Dive":
             st.subheader("📋 Subsurface Characterization")
             st.markdown(f"• **Primary Seal:** {well_info.get('primary_seal', 'Regional Marine Shale')}")
             st.markdown(f"• **Seismic Correlation:** {well_info.get('seismic_inversion_correlation', 'Correlates with Low Zp Volume')}")
-            struct = well_info.get("structural_interpretation", {})
-            st.markdown(f"• **Structural Fault:** **{struct.get('fault_candidate', 'Normal Fault stick near CDP 2950')}**")
+            
+            fault_display = struct_info.get('fault_name', 'Pending DUG Horizon Pick') if is_fully_integrated else "Pending DUG Horizon Pick"
+            st.markdown(f"• **Structural Fault:** **{fault_display}**")
             st.markdown(f"• **Recommended Action:** {well_info.get('recommended_next_action', 'Evaluate fault seal and sand continuity')}")
 
     with col_right:
@@ -150,8 +160,8 @@ if navigation_mode == "📊 Single Well Deep-Dive":
             st.subheader("🎯 Pre-Stack AVO & Elastic Inversion")
             avo_data = well_info.get("avo_inversion", {})
             st.markdown(f"• **AVO Anomaly Class:** **{avo_data.get('avo_class', 'Class III (Bright Spot)')}**")
-            st.markdown(f"• **Vp/Vs Ratio:** **{avo_data.get('vp_vs_ratio', '1.59')}**")
-            st.markdown(f"• **P-Impedance ($Z_p$):** **{avo_data.get('p_impedance', '5,880')}** | **S-Impedance ($Z_s$):** **{avo_data.get('s_impedance', '3,700')}**")
+            st.markdown(f"• **Vp/Vs Ratio:** **{avo_data.get('vp_vs_ratio', '1.69')}**")
+            st.markdown(f"• **P-Impedance ($Z_p$):** **{avo_data.get('p_impedance', '6,450')}** | **S-Impedance ($Z_s$):** **{avo_data.get('s_impedance', '3,810')}**")
 
     st.divider()
 
@@ -170,49 +180,23 @@ if navigation_mode == "📊 Single Well Deep-Dive":
     if fig:
         st.pyplot(fig)
 
-    if df_sub is not None and not df_sub.empty and zoom_range:
-        st.markdown(f"### 🎯 Re-Calculated Properties for Selected Range ({zoom_range[0]:.1f}m - {zoom_range[1]:.1f}m)")
-        
-        avg_vsh = df_sub['VSH'].mean() if 'VSH' in df_sub.columns else np.nan
-        avg_phit = df_sub['PHIT'].mean() if 'PHIT' in df_sub.columns else np.nan
-        avg_sh = df_sub['SH'].mean() if 'SH' in df_sub.columns else np.nan
-        
-        is_pay = (avg_vsh < 0.3) and (avg_phit > 0.15) and (avg_sh > 0.5)
-
-        with st.container(border=True):
-            d1, d2, d3 = st.columns(3)
-            d1.metric("Interval Avg Shale Vol (VSH)", f"{avg_vsh*100:.1f}%" if not np.isnan(avg_vsh) else "N/A")
-            d2.metric("Interval Avg Porosity (PHIT)", f"{avg_phit*100:.1f}%" if not np.isnan(avg_phit) else "N/A")
-            d3.metric("Interval Avg HC Saturation (Sh)", f"{avg_sh*100:.1f}%" if not np.isnan(avg_sh) else "N/A")
-
-            st.markdown("**Interval Interpretation:**")
-            if is_pay:
-                st.success(f"✅ **Commercial Pay Confirmed for {zoom_range[0]:.1f}m - {zoom_range[1]:.1f}m:** Low shale (<30%), high porosity (>15%), and strong HC saturation (>50%).")
-            else:
-                st.info(f"ℹ️ **Non-Pay / Tight / Water-Bearing Interval for {zoom_range[0]:.1f}m - {zoom_range[1]:.1f}m:** Does not meet full pay cutoffs.")
-
     st.divider()
 
-# ==========================================
-# DIRECT AI EXPLORATION COPILOT (NO POPOVER)
-# ==========================================
+    # EXACT COPILOT CODE STRUCTURE
     st.subheader("🤖 Exploration Copilot — Agentic AI Assistant")
     st.caption(f"Loaded Subsurface & Structural Context for Well **{well_info['well_name']}**")
 
-# Bounded Container Box for direct visibility
     with st.container(border=True):
         st.markdown("##### Select a preset query or type a custom depth question below:")
 
-    # 2 Preset Action Buttons side-by-side
         col_b1, col_b2 = st.columns(2)
         q1 = col_b1.button("1. Evaluate Trap & Reservoir Quality", use_container_width=True)
         q2 = col_b2.button("2. Identify Key Geological Risks", use_container_width=True)
 
-    # Custom Depth / Property Input Field
         user_input = st.text_input(
             "Ask Copilot a custom question (e.g., regarding depth intervals, structural fault sealing, or LAS log properties):",
             placeholder="e.g., What is the trapping risk between depth 2050m and 3200m?"
-    )
+        )
 
         prompt_text = None
         if q1:
@@ -222,12 +206,9 @@ if navigation_mode == "📊 Single Well Deep-Dive":
         elif user_input:
             prompt_text = user_input
 
-    # Run Local Gemma 4 Model Inference when a button or text query is submitted
         if prompt_text:
             st.markdown(f"**Query Submitted:** *{prompt_text}*")
         
-        # Ground-Truth System Prompt including Wireline + Structural Fault Picks
-            struct_data = well_info.get("structural_interpretation", {})
             system_prompt = f"""
             You are Exploration Copilot, an expert AI Geoscientist.
             Evaluate Well {well_info['well_name']} using this ground truth evidence:
@@ -238,11 +219,11 @@ if navigation_mode == "📊 Single Well Deep-Dive":
             - Pay Zone Petrophysics: {well_info.get('pay_zone_properties', {})}
             - Pre-Stack AVO Attributes: {well_info.get('avo_inversion', {})}
             - DUG Insight Structural Fault Interpretation:
-              * Fault Name: {struct_data.get('fault_name', 'N/A')}
-              * Horizon Pick: {struct_data.get('horizon_pick', 'N/A')}
-              * Structural Feature: {struct_data.get('structural_feature', 'N/A')}
-              * Trapping Mechanism: {struct_data.get('trap_mechanism', 'N/A')}
-              * Structural Seal Risk: {struct_data.get('structural_risk', 'N/A')}
+              * Fault Name: {struct_info.get('fault_name', 'Pending DUG Horizon Pick') if is_fully_integrated else 'Pending DUG Horizon Pick'}
+              * Horizon Pick: {struct_info.get('horizon_pick', 'Pending DUG Horizon Pick') if is_fully_integrated else 'Pending DUG Horizon Pick'}
+              * Structural Feature: {struct_info.get('structural_feature', 'Pending DUG Horizon Pick') if is_fully_integrated else 'Pending DUG Horizon Pick'}
+              * Trapping Mechanism: {struct_info.get('trap_mechanism', 'Pending DUG Horizon Pick') if is_fully_integrated else 'Pending DUG Horizon Pick'}
+              * Structural Seal Risk: {struct_info.get('structural_risk', 'Pending DUG Horizon Pick') if is_fully_integrated else 'Pending DUG Horizon Pick'}
 
             Always structure your response step-by-step:
             1. 📊 Observation (Cite exact Vsh, PHIT, Sw, and fault displacement parameters)
@@ -253,6 +234,11 @@ if navigation_mode == "📊 Single Well Deep-Dive":
 
             with st.spinner("Analyzing ground truth & structural evidence with Gemma 4..."):
                 try:
+                    if is_fully_integrated:
+                        st.success(f"✅ **INTERPRETATION NOTICE:** Derived strictly from verified ground-truth data for Well {well_info['well_name']} (parsed wireline logs + traced DUG Insight picks).")
+                    else:
+                        st.info(f"ℹ️ **INTERPRETATION NOTICE:** Derived strictly from given data for Well {well_info['well_name']}. Log petrophysics are calculated from parsed log curves; structural picks remain Pending DUG Horizon Pick.")
+
                     resp = client.chat.completions.create(
                         model="google/gemma-4-26B-A4B-it",
                         messages=[
@@ -264,7 +250,6 @@ if navigation_mode == "📊 Single Well Deep-Dive":
                     st.markdown(resp.choices[0].message.content)
                 except Exception as e:
                     st.error(f"Error connecting to local vLLM endpoint: {e}")
-    
 
 # ==========================================
 # MODE 2: MULTI-WELL PROSPECT RANKING
@@ -274,7 +259,7 @@ else:
     st.caption("Select candidate wells for horizontal prospect evaluation, comparative petrophysical summary, and management decision logic.")
     
     available_well_keys = list(WELL_DATABASE.keys())
-    default_selected = ["eo-2", "eo-1", "p-1", "m-1"] if all(k in available_well_keys for k in ["eo-2", "eo-1", "p-1", "m-1"]) else available_well_keys[:4]
+    default_selected = ["m-1", "p-1", "eo-1", "eo-2"] if all(k in available_well_keys for k in ["m-1", "p-1", "eo-1", "eo-2"]) else available_well_keys[:4]
     
     selected_wells = st.multiselect(
         "🎯 Select Candidate Wells for Ranking (2 to 4 Wells):",
@@ -287,20 +272,22 @@ else:
         st.warning("⚠️ Please select at least 2 candidate wells to enable comparative ranking.")
     else:
         raw_list = []
+        
         for w in selected_wells:
             info = WELL_DATABASE[w]
             avo = info.get("avo_inversion", {})
             props = info.get("pay_zone_properties", {})
+            struct = info.get("structural_interpretation", {})
+            
+            is_well_fully_integrated = w.lower() in ["m-1", "p-1"]
+            fault_status = struct.get("fault_name", "Pending DUG Horizon Pick") if is_well_fully_integrated else "Pending DUG Horizon Pick"
             
             pay_samples = info.get("net_pay_samples", 0)
-            
-            # Extract raw string values safely
             sh_raw = str(props.get("hydrocarbon_saturation", "65.0%"))
             vp_vs_raw = str(avo.get("vp_vs_ratio", "1.60"))
             vsh_raw = str(props.get("vsh_shale_volume", "0.15"))
             phit_raw = str(props.get("porosity_phit", "18.0%"))
 
-            # Robust float parsing: strip out parenthesis text and percent signs
             try:
                 sh_val = float(sh_raw.split()[0].replace("%", "").strip())
             except ValueError:
@@ -322,19 +309,16 @@ else:
                 vp_vs_val = 1.60
             
             composite_score = (pay_samples * (sh_val / 100.0) * phit_val) / (vp_vs_val * (vsh_val + 0.01))
-            
-            # Format clean labels for UI display
-            vsh_display = vsh_raw if "(" in vsh_raw else f"{vsh_val:.3f} (Clean Sandstone)"
-            phit_display = phit_raw if "(" in phit_raw else f"{phit_val:.1f}% (High Quality Storage)"
 
             raw_list.append({
                 "key": w,
                 "well_name": info["well_name"],
+                "fault_status": fault_status,
                 "pay_samples": pay_samples,
                 "depth_range": info["pay_zone_depth"],
-                "vsh_raw": vsh_display,
-                "phit_raw": phit_display,
-                "sh": sh_raw if "%" in sh_raw else f"{sh_val:.1f}%",
+                "vsh_raw": f"{vsh_val:.3f} (Clean Sandstone)",
+                "phit_raw": f"{phit_val:.1f}% (High Quality Storage)",
+                "sh": f"{sh_val:.1f}%",
                 "vp_vs": f"{vp_vs_val:.2f}",
                 "avo_class": avo.get("avo_class", "Class III (Bright Spot)"),
                 "seal": info.get("primary_seal", "Thick regional marine shale"),
@@ -367,16 +351,16 @@ else:
                     f"**Porosity ($PHIT$):** {item['phit_raw']} &nbsp;&nbsp;|&nbsp;&nbsp; "
                     f"**$V_p/V_s$ Ratio:** **{item['vp_vs']}**"
                 )
-                st.markdown(f"• **AVO Anomaly:** **{item['avo_class']}** | **Primary Seal:** {item['seal']}")
+                st.markdown(f"• **AVO Anomaly:** **{item['avo_class']}** | **Fault Pick:** {item['fault_status']}")
 
         st.divider()
 
-        # 2. COMPARATIVE PETROPHYSICAL SUMMARY TABLE
-        st.subheader("📊 2. Comparative Petrophysical Summary")
+        st.subheader("📊 Comparative Petrophysical Summary")
         
         summary_rows = []
         for item in raw_list:
             w_name = item["well_name"]
+            
             if item["pay_samples"] > 800:
                 qual_assess = "Tier 1: Massive volume, high saturation."
             elif item["pay_samples"] > 400:
@@ -388,6 +372,7 @@ else:
                 
             summary_rows.append({
                 "Well ID": w_name,
+                "Structural Pick Status": "Verified Pick" if item["fault_status"] != "Pending DUG Horizon Pick" else "Pending Horizon Mapping",
                 "Net Pay (m)": float(item["pay_samples"]),
                 "Porosity (ϕ)": item["phit_raw"].split()[0],
                 "VSH (Clay)": item["vsh_raw"].split()[0],
@@ -400,29 +385,29 @@ else:
 
         st.divider()
 
-        # 3. DECISION MATRIX TABLE
-        st.subheader("🎯 3. Decision Matrix & Justification")
+        st.subheader("🎯 Decision Matrix & Justification")
         matrix_data = [
-            {"Criteria": "Resource Volume (Net Pay)", "Weight": "50%", "EO-2": "⭐⭐⭐⭐⭐", "EO-1": "⭐⭐⭐", "M-1": "⭐", "P-1": "⭐", "Management Logic": "High Net Pay = High ROI potential."},
-            {"Criteria": "Storage Capacity (ϕ)", "Weight": "25%", "EO-2": "⭐⭐⭐", "EO-1": "⭐⭐", "M-1": "⭐⭐⭐", "P-1": "⭐⭐⭐⭐⭐", "Management Logic": "High Porosity = High flow rates."},
-            {"Criteria": "Fluid Saturation (Sh)", "Weight": "15%", "EO-2": "⭐⭐⭐⭐⭐", "EO-1": "⭐⭐⭐", "M-1": "⭐⭐⭐⭐", "P-1": "⭐⭐⭐⭐", "Management Logic": "High Saturation = Lower water risk."},
-            {"Criteria": "Lithology Cleanliness", "Weight": "10%", "EO-2": "⭐⭐⭐⭐", "EO-1": "⭐⭐⭐", "M-1": "⭐⭐", "P-1": "⭐⭐⭐⭐⭐", "Management Logic": "Low VSH = Better permeability."},
-            {"Criteria": "TOTAL SCORE", "Weight": "100%", "EO-2": "9.4 / 10", "EO-1": "6.5 / 10", "M-1": "5.1 / 10", "P-1": "5.8 / 10", "Management Logic": "Ranked Commercial Score"}
+            {"Criteria": "Resource Volume (Net Pay)", "Weight": "50%", "M-1": "⭐⭐", "P-1": "⭐", "EO-1": "⭐⭐⭐", "EO-2": "⭐⭐⭐⭐⭐", "Management Logic": "High Net Pay = High ROI potential."},
+            {"Criteria": "Storage Capacity (ϕ)", "Weight": "25%", "M-1": "⭐⭐⭐", "P-1": "⭐⭐⭐⭐⭐", "EO-1": "⭐⭐", "EO-2": "⭐⭐⭐", "Management Logic": "High Porosity = High flow rates."},
+            {"Criteria": "Fluid Saturation (Sh)", "Weight": "15%", "M-1": "⭐⭐⭐⭐", "P-1": "⭐⭐⭐⭐", "EO-1": "⭐⭐⭐", "EO-2": "⭐⭐⭐⭐⭐", "Management Logic": "High Saturation = Lower water risk."},
+            {"Criteria": "Lithology Cleanliness", "Weight": "10%", "M-1": "⭐⭐", "P-1": "⭐⭐⭐⭐⭐", "EO-1": "⭐⭐⭐", "EO-2": "⭐⭐⭐⭐", "Management Logic": "Low VSH = Better permeability."},
+            {"Criteria": "TOTAL SCORE", "Weight": "100%", "M-1": "5.1 / 10", "P-1": "5.8 / 10", "EO-1": "6.5 / 10", "EO-2": "9.4 / 10", "Management Logic": "Ranked Commercial Score"}
         ]
         df_matrix = pd.DataFrame(matrix_data)
         st.dataframe(df_matrix, use_container_width=True)
 
-        # AI EXECUTIVE REASONING BUTTON
+        st.divider()
+
         if st.button("🚀 Run Gemma 4 AI Executive Prospect Ranking", type="primary", use_container_width=True):
             multi_well_context = "\n".join([
-                f"- Rank #{i+1} (Well {item['well_name']}): Net Pay={item['pay_samples']} samples, HC Saturation={item['sh']}, Vp/Vs={item['vp_vs']}, VSH={item['vsh_raw']}, Porosity={item['phit_raw']}, AVO Class={item['avo_class']}"
+                f"- Rank #{i+1} (Well {item['well_name']}, Fault Pick={item['fault_status']}): Net Pay={item['pay_samples']} samples, HC Saturation={item['sh']}, Vp/Vs={item['vp_vs']}, VSH={item['vsh_raw']}, Porosity={item['phit_raw']}, AVO Class={item['avo_class']}"
                 for i, item in enumerate(raw_list)
             ])
             
             rank_prompt = f"""
             You are Exploration Copilot evaluating candidate wells for executive management:
             {multi_well_context}
-            Provide executive prospect ranking and deep geological decision justification.
+            Provide executive prospect ranking and deep geological decision justification strictly following the given data context.
             """
             
             with st.spinner("Analyzing candidate wells with Gemma 4..."):
@@ -434,4 +419,5 @@ else:
                 
                 with st.container(border=True):
                     st.markdown("### 🤖 Gemma 4 Executive Evaluation & Reasoning")
+                    st.info("ℹ️ **DATA INTEGRITY NOTICE:** This comparative evaluation strictly follows the provided dataset. Petrophysical metrics are calculated from parsed log curves, while structural factors reflect whether DUG Horizon mapping is completed or pending.")
                     st.markdown(response.choices[0].message.content)

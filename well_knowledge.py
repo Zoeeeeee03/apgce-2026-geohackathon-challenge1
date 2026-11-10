@@ -1,55 +1,32 @@
 WELL_DATABASE = {
-    "eo-2": {
-        "well_name": "EO-2",
-        "total_logged_samples": 10038,
-        "primary_seal": "Thick regional marine shale (Overall Avg VSH = 72.3%)",
-        "net_pay_samples": 917,
-        "pay_zone_depth": "1753.1m - 2989.0m",
+    "m-1": {
+        "well_name": "M-1",
+        "total_logged_samples": 19146,
+        "primary_seal": "Thick regional marine shale (Overall Avg VSH = 66.5%)",
+        "net_pay_samples": 237,
+        "pay_zone_depth": "1862.8m - 3659.1m",
         "pay_zone_properties": {
-            "vsh_shale_volume": "0.106",
-            "porosity_phit": "18.8%",
-            "water_saturation_swt": "32.6%",
-            "hydrocarbon_saturation": "67.4%",
+            "vsh_shale_volume": "0.178",
+            "porosity_phit": "18.5%",
+            "water_saturation_swt": "35.9%",
+            "hydrocarbon_saturation": "64.1%",
             "fluid_type": "Hydrocarbon Pay Interval"
         },
         "avo_inversion": {
-            "vp_vs_ratio": "1.59",
-            "p_impedance": "5,880",
-            "s_impedance": "3,700",
-            "avo_class": "Class III (Bright Spot)"
+            "vp_vs_ratio": "1.69",
+            "p_impedance": "6,450",
+            "s_impedance": "3,810",
+            "avo_class": "Class II (Moderate Anomaly)"
         },
-        "seismic_inversion_correlation": "Correlates with 3D Total Sand Probability.",
+        "seismic_inversion_correlation": "Correlates with Moderate Total Sand Probability.",
         "structural_interpretation": {
-            "fault_candidate": "Normal Fault stick near CDP 2950",
-            "trap_mechanism": "Fault-bounded structural closure"
+            "fault_name": "Fault Array M1-F1, M1-F2, M1-F3 (m1 f1..f3 fault sticks)",
+            "horizon_pick": "Mapped Reservoir Reflector Array (line-1 m1 to line-17 m1 at TWT ~1.8s-2.4s)",
+            "structural_feature": "Fault-disrupted anticlinal crest with normal fault displacements of ~25ms-35ms TWT near CDP 3443",
+            "trap_mechanism": "Fault-bounded structural closure along anticlinal flank sealed against marine shale",
+            "structural_risk": "Fault seal breach and reservoir compartmentalization risk near crestal fault zone"
         },
-        "recommended_next_action": "Evaluate lateral sand continuity across 3D inversion volumes."
-    },
-    "eo-1": {
-        "well_name": "EO-1",
-        "total_logged_samples": 12287,
-        "primary_seal": "Thick regional marine shale (Overall Avg VSH = 69.4%)",
-        "net_pay_samples": 586,
-        "pay_zone_depth": "1894.5m - 3036.0m",
-        "pay_zone_properties": {
-            "vsh_shale_volume": "0.139",
-            "porosity_phit": "17.3%",
-            "water_saturation_swt": "37.2%",
-            "hydrocarbon_saturation": "62.8%",
-            "fluid_type": "Hydrocarbon Pay Interval"
-        },
-        "avo_inversion": {
-            "vp_vs_ratio": "1.64",
-            "p_impedance": "6,200",
-            "s_impedance": "3,780",
-            "avo_class": "Class III (Bright Spot)"
-        },
-        "seismic_inversion_correlation": "Correlates with 3D Total Sand Probability.",
-        "structural_interpretation": {
-            "fault_candidate": "Subtle dipping fault truncation base reservoir",
-            "trap_mechanism": "Structural-stratigraphic pinchout"
-        },
-        "recommended_next_action": "Evaluate fault seal capacity and verify OWC boundary."
+        "recommended_next_action": "Assess compartmentalization risks near crestal fault."
     },
     "p-1": {
         "well_name": "P-1",
@@ -80,34 +57,63 @@ WELL_DATABASE = {
         },
         "recommended_next_action": "Determine lateral extent of thin high-porosity lens."
     },
-    "m-1": {
-        "well_name": "M-1",
-        "total_logged_samples": 19146,
-        "primary_seal": "Thick regional marine shale (Overall Avg VSH = 66.5%)",
-        "net_pay_samples": 237,
-        "pay_zone_depth": "1862.8m - 3659.1m",
+    "eo-1": {
+        "well_name": "EO-1",
+        "total_logged_samples": 12287,
+        "primary_seal": "Thick regional marine shale (Overall Avg VSH = 69.4%)",
+        "net_pay_samples": 586,
+        "pay_zone_depth": "1894.5m - 3036.0m",
         "pay_zone_properties": {
-            "vsh_shale_volume": "0.178",
-            "porosity_phit": "18.5%",
-            "water_saturation_swt": "35.9%",
-            "hydrocarbon_saturation": "64.1%",
+            "vsh_shale_volume": "0.139",
+            "porosity_phit": "17.3%",
+            "water_saturation_swt": "37.2%",
+            "hydrocarbon_saturation": "62.8%",
             "fluid_type": "Hydrocarbon Pay Interval"
         },
         "avo_inversion": {
-            "vp_vs_ratio": "1.69",
-            "p_impedance": "6,450",
-            "s_impedance": "3,810",
-            "avo_class": "Class II (Moderate Anomaly)"
+            "vp_vs_ratio": "1.64",
+            "p_impedance": "6,200",
+            "s_impedance": "3,780",
+            "avo_class": "Class III (Bright Spot)"
         },
-        "seismic_inversion_correlation": "Correlates with Moderate Total Sand Probability.",
+        "seismic_inversion_correlation": "Pending 3D Inversion Validation",
         "structural_interpretation": {
-            "fault_name": "Fault Array M1-F1, M1-F2, M1-F3 (m1 f1..f3 fault sticks)",
-            "horizon_pick": "Mapped Reservoir Reflector Array (line-1 m1 to line-17 m1 at TWT ~1.8s-2.4s)",
-            "structural_feature": "Fault-disrupted anticlinal crest with normal fault displacements of ~25ms-35ms TWT near CDP 3443",
-            "trap_mechanism": "Fault-bounded structural closure along anticlinal flank sealed against marine shale",
-            "structural_risk": "Fault seal breach and reservoir compartmentalization risk near crestal fault zone"
+            "fault_name": "Pending DUG Horizon Pick",
+            "horizon_pick": "Pending DUG Horizon Pick",
+            "structural_feature": "Pending DUG Horizon Pick",
+            "trap_mechanism": "Pending DUG Horizon Pick",
+            "structural_risk": "Pending DUG Horizon Pick"
         },
-        "recommended_next_action": "Assess compartmentalization risks near crestal fault."
+        "recommended_next_action": "Perform visual seismic horizon mapping in DUG Insight."
+    },
+    "eo-2": {
+        "well_name": "EO-2",
+        "total_logged_samples": 10038,
+        "primary_seal": "Thick regional marine shale (Overall Avg VSH = 72.3%)",
+        "net_pay_samples": 917,
+        "pay_zone_depth": "1753.1m - 2989.0m",
+        "pay_zone_properties": {
+            "vsh_shale_volume": "0.106",
+            "porosity_phit": "18.8%",
+            "water_saturation_swt": "32.6%",
+            "hydrocarbon_saturation": "67.4%",
+            "fluid_type": "Hydrocarbon Pay Interval"
+        },
+        "avo_inversion": {
+            "vp_vs_ratio": "1.59",
+            "p_impedance": "5,880",
+            "s_impedance": "3,700",
+            "avo_class": "Class III (Bright Spot)"
+        },
+        "seismic_inversion_correlation": "Pending 3D Inversion Validation",
+        "structural_interpretation": {
+            "fault_name": "Pending DUG Horizon Pick",
+            "horizon_pick": "Pending DUG Horizon Pick",
+            "structural_feature": "Pending DUG Horizon Pick",
+            "trap_mechanism": "Pending DUG Horizon Pick",
+            "structural_risk": "Pending DUG Horizon Pick"
+        },
+        "recommended_next_action": "Perform visual seismic horizon mapping in DUG Insight."
     },
     "no-1": {
         "well_name": "NO-1",
@@ -128,12 +134,15 @@ WELL_DATABASE = {
             "s_impedance": "3,760",
             "avo_class": "Class III (Bright Spot)"
         },
-        "seismic_inversion_correlation": "Correlates with 3D Total Sand Probability.",
+        "seismic_inversion_correlation": "Pending 3D Inversion Validation",
         "structural_interpretation": {
-            "fault_candidate": "Normal Fault stick 'no 1 f3' near CDP 3081",
-            "trap_mechanism": "Fault-bounded structural closure"
+            "fault_name": "Pending DUG Horizon Pick",
+            "horizon_pick": "Pending DUG Horizon Pick",
+            "structural_feature": "Pending DUG Horizon Pick",
+            "trap_mechanism": "Pending DUG Horizon Pick",
+            "structural_risk": "Pending DUG Horizon Pick"
         },
-        "recommended_next_action": "Evaluate lateral sand continuity."
+        "recommended_next_action": "Perform visual seismic horizon mapping in DUG Insight."
     },
     "no-2": {
         "well_name": "NO-2",
@@ -154,12 +163,15 @@ WELL_DATABASE = {
             "s_impedance": "3,790",
             "avo_class": "Class II (Moderate Anomaly)"
         },
-        "seismic_inversion_correlation": "Correlates with moderate sand probability.",
+        "seismic_inversion_correlation": "Pending 3D Inversion Validation",
         "structural_interpretation": {
-            "fault_candidate": "Crestal fault zone branch",
-            "trap_mechanism": "Faulted anticlinal flank"
+            "fault_name": "Pending DUG Horizon Pick",
+            "horizon_pick": "Pending DUG Horizon Pick",
+            "structural_feature": "Pending DUG Horizon Pick",
+            "trap_mechanism": "Pending DUG Horizon Pick",
+            "structural_risk": "Pending DUG Horizon Pick"
         },
-        "recommended_next_action": "Verify updip closure."
+        "recommended_next_action": "Perform visual seismic horizon mapping in DUG Insight."
     },
     "no-4": {
         "well_name": "NO-4",
@@ -180,12 +192,15 @@ WELL_DATABASE = {
             "s_impedance": "3,680",
             "avo_class": "Class III (Bright Spot)"
         },
-        "seismic_inversion_correlation": "Low P-impedance anomaly.",
+        "seismic_inversion_correlation": "Pending 3D Inversion Validation",
         "structural_interpretation": {
-            "fault_candidate": "Minor fault offset near top reservoir",
-            "trap_mechanism": "Structural dip closure"
+            "fault_name": "Pending DUG Horizon Pick",
+            "horizon_pick": "Pending DUG Horizon Pick",
+            "structural_feature": "Pending DUG Horizon Pick",
+            "trap_mechanism": "Pending DUG Horizon Pick",
+            "structural_risk": "Pending DUG Horizon Pick"
         },
-        "recommended_next_action": "Verify updip structural relief."
+        "recommended_next_action": "Perform visual seismic horizon mapping in DUG Insight."
     },
     "np-1": {
         "well_name": "NP-1",
@@ -206,12 +221,15 @@ WELL_DATABASE = {
             "s_impedance": "3,710",
             "avo_class": "Class III (Bright Spot)"
         },
-        "seismic_inversion_correlation": "Strong sand probability anomaly.",
+        "seismic_inversion_correlation": "Pending 3D Inversion Validation",
         "structural_interpretation": {
-            "fault_candidate": "Bounding normal fault",
-            "trap_mechanism": "Fault closure"
+            "fault_name": "Pending DUG Horizon Pick",
+            "horizon_pick": "Pending DUG Horizon Pick",
+            "structural_feature": "Pending DUG Horizon Pick",
+            "trap_mechanism": "Pending DUG Horizon Pick",
+            "structural_risk": "Pending DUG Horizon Pick"
         },
-        "recommended_next_action": "Check fault seal integrity."
+        "recommended_next_action": "Perform visual seismic horizon mapping in DUG Insight."
     },
     "np-2": {
         "well_name": "NP-2",
@@ -232,12 +250,15 @@ WELL_DATABASE = {
             "s_impedance": "3,730",
             "avo_class": "Class III (Bright Spot)"
         },
-        "seismic_inversion_correlation": "Total Sand Probability correlation.",
+        "seismic_inversion_correlation": "Pending 3D Inversion Validation",
         "structural_interpretation": {
-            "fault_candidate": "Diagonally dipping fault trace",
-            "trap_mechanism": "Structural dip closure"
+            "fault_name": "Pending DUG Horizon Pick",
+            "horizon_pick": "Pending DUG Horizon Pick",
+            "structural_feature": "Pending DUG Horizon Pick",
+            "trap_mechanism": "Pending DUG Horizon Pick",
+            "structural_risk": "Pending DUG Horizon Pick"
         },
-        "recommended_next_action": "Evaluate lateral continuity."
+        "recommended_next_action": "Perform visual seismic horizon mapping in DUG Insight."
     },
     "o-1": {
         "well_name": "O-1",
@@ -258,12 +279,15 @@ WELL_DATABASE = {
             "s_impedance": "3,700",
             "avo_class": "Class III (Bright Spot)"
         },
-        "seismic_inversion_correlation": "3D P-impedance anomaly.",
+        "seismic_inversion_correlation": "Pending 3D Inversion Validation",
         "structural_interpretation": {
-            "fault_candidate": "Western boundary fault",
-            "trap_mechanism": "Fault-bounded closure"
+            "fault_name": "Pending DUG Horizon Pick",
+            "horizon_pick": "Pending DUG Horizon Pick",
+            "structural_feature": "Pending DUG Horizon Pick",
+            "trap_mechanism": "Pending DUG Horizon Pick",
+            "structural_risk": "Pending DUG Horizon Pick"
         },
-        "recommended_next_action": "Evaluate pressure communication."
+        "recommended_next_action": "Perform visual seismic horizon mapping in DUG Insight."
     },
     "o-2": {
         "well_name": "O-2",
@@ -284,12 +308,15 @@ WELL_DATABASE = {
             "s_impedance": "3,810",
             "avo_class": "Class II (Weak Anomaly)"
         },
-        "seismic_inversion_correlation": "Weak sand probability.",
+        "seismic_inversion_correlation": "Pending 3D Inversion Validation",
         "structural_interpretation": {
-            "fault_candidate": "Fault intersection",
-            "trap_mechanism": "Thin sand pinchout"
+            "fault_name": "Pending DUG Horizon Pick",
+            "horizon_pick": "Pending DUG Horizon Pick",
+            "structural_feature": "Pending DUG Horizon Pick",
+            "trap_mechanism": "Pending DUG Horizon Pick",
+            "structural_risk": "Pending DUG Horizon Pick"
         },
-        "recommended_next_action": "De-prioritize."
+        "recommended_next_action": "De-prioritize due to minimal pay thickness."
     },
     "o-3": {
         "well_name": "O-3",
@@ -310,12 +337,15 @@ WELL_DATABASE = {
             "s_impedance": "3,810",
             "avo_class": "Class II (Weak Anomaly)"
         },
-        "seismic_inversion_correlation": "Background sand probability.",
+        "seismic_inversion_correlation": "Pending 3D Inversion Validation",
         "structural_interpretation": {
-            "fault_candidate": "Bounding fault plane segment",
-            "trap_mechanism": "Fault-assisted structural dip"
+            "fault_name": "Pending DUG Horizon Pick",
+            "horizon_pick": "Pending DUG Horizon Pick",
+            "structural_feature": "Pending DUG Horizon Pick",
+            "trap_mechanism": "Pending DUG Horizon Pick",
+            "structural_risk": "Pending DUG Horizon Pick"
         },
-        "recommended_next_action": "Evaluate updip closure."
+        "recommended_next_action": "Perform visual seismic horizon mapping in DUG Insight."
     },
     "s-1": {
         "well_name": "S-1",
@@ -336,11 +366,14 @@ WELL_DATABASE = {
             "s_impedance": "3,690",
             "avo_class": "Class III (Bright Spot)"
         },
-        "seismic_inversion_correlation": "High HC saturation highlight.",
+        "seismic_inversion_correlation": "Pending 3D Inversion Validation",
         "structural_interpretation": {
-            "fault_candidate": "Shallow structural crest fault",
-            "trap_mechanism": "Structural closure"
+            "fault_name": "Pending DUG Horizon Pick",
+            "horizon_pick": "Pending DUG Horizon Pick",
+            "structural_feature": "Pending DUG Horizon Pick",
+            "trap_mechanism": "Pending DUG Horizon Pick",
+            "structural_risk": "Pending DUG Horizon Pick"
         },
-        "recommended_next_action": "Evaluate updip structural crest."
+        "recommended_next_action": "Perform visual seismic horizon mapping in DUG Insight."
     }
 }
