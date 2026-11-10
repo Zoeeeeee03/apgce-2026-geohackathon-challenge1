@@ -8,9 +8,9 @@ import openai
 from well_knowledge import WELL_DATABASE
 
 # 1. Page Config
-st.set_page_config(page_title="APGCE Exploration Copilot", page_icon="🌍", layout="wide")
+st.set_page_config(page_title="APGCE Geohackathon Team Wenner Protegees", page_icon="🌍", layout="wide")
 
-st.title("🌍 APGCE GeoHackathon 2026 — Subsurface Exploration Copilot")
+st.title("🌍 APGCE GeoHackathon 2026 — StrataMind")
 st.caption("Agentic AI Multi-Well Prospect Ranking & Pre-Stack AVO Petrophysical Evaluation System")
 
 # Connect to Local HPC vLLM Gemma 4 Endpoint
