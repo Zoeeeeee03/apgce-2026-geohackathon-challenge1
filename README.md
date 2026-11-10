@@ -40,7 +40,7 @@ Evaluating exploration prospects traditionally requires geoscientists to spend *
                                           ▼
                        ┌─────────────────────────────────────┐
                        │ Streamlit Web Dashboard (`app.py`)  │
-                       │  • 3-Track Interactive Zoom Plotter │
+                       │  • 4-Track Interactive Zoom Plotter │
                        │  • Subsurface & AVO Inversion Panel │
                        │  • Multi-Well Ranking Matrix        │
                        │  • Directly Grounded Gemma 4 AI     │
@@ -64,23 +64,23 @@ All wireline curve plots, sample counts, net pay intervals, and quantitative pet
 
 ### 2. **Visual Geological Picks (100% Grounded):** 
 
-Structural normal fault parameters for **Well P-1** (e.g., `Fault P1-F08`, CDP 2200–2400, 25ms TWT displacement) represent real seismic interpretations performed by our team in DUG Insight.
+Structural normal fault parameters for **Well P-1** (e.g., `Fault P1-F08`, CDP 2200–2400, 25ms TWT displacement in well P-1) represent real seismic interpretations performed by our team in DUG Insight.
 
 ### 3. **Zero-Hallucination Safe Fallbacks:**
 
-Un-interpreted candidate wells are strictly labeled as `"Pending DUG Horizon Pick"` and `"Pending Inversion"` rather than using synthetic values, ensuring the Agentic AI only reasons over verified domain evidence.
+Unmapped candidate wells explicitly display `"Pending DUG Horizon Pick"` for structural attributes to ensure the AI does not hallucinate unverified fault geometries.
 
 ---
 
 ## 🚀 Key Technical Features & Capabilities
 
-### 1. 📊 Interactive 3-Track Wireline Log Evidence Visualizer
+### 1. 📊 Interactive 4-Track Wireline Log Evidence Visualizer
 
-* **Customizable Track Mapping:** Allows engineers to toggle between Lithology (VSh, GR, SP), Porosity/Elastic (PHIT, Vp/Vs, Zp, Zs), and Fluid Saturation (Sh, Sw, Resistivity).
+* **Lithology & Storage (Tracks 1 & 2):** Renders Vsh (Track 1) and Total Porosity (PHIT, Track 2) with color-filled reservoir pay cutoffs (Vsh < 0.30, PHIT > 0.15).
 
+* **Hydrocarbon Saturation Focus (Sh = 1 - Sw, Track 3):** Replaces raw water saturation with a dedicated Hydrocarbon Saturation track highlighted by custom gold/green pay fills.
 
-* **Hydrocarbon Saturation Focus (Sh = 1 - Sw):** Replaces raw water saturation with a dedicated Hydrocarbon Saturation track highlighted by custom gold/green pay fills.
-
+* **Pay Summary Flags (Track 4):** Displays active Gas-in-Place (PS_GIP) and Oil-in-Place (PS_OIP) pay summary flags parsed directly from LAS curves.
 
 * **Depth Indexing (m) & Live Slider Zooming:** Features interactive zoom sliders for precise inspection of target pay intervals (e.g., 1800m - 2500m) against DUG Insight 3D seismic sections.
 
@@ -90,7 +90,7 @@ Un-interpreted candidate wells are strictly labeled as `"Pending DUG Horizon Pic
 
 ### 2. 🎯 Pre-Stack AVO & Elastic Inversion Screening Panel
 
-* **Fluid & Lithology Discrimination:** Integrates Amplitude Versus Offset (AVO) anomaly classifications (Class I–IV Bright/Dim Spots) and flags low Vp/Vs ratios (< 1.7) to confirm gas/light-oil pay versus brine sands.
+* **Fluid & Lithology Discrimination:** Integrates Amplitude Versus Offset (AVO) anomaly classifications (Class II-III Bright Spots) and flags low Vp/Vs ratios (< 1.7) to confirm gas/light-oil pay versus brine sands.
 
 * **DUG Insight Structural Grounding:** Incorporates traced normal fault geometry (CDP offsets, Two-Way Travel Time displacement) directly into the AI prompt to evaluate fault-dependent structural closures vs. stratigraphic pinchouts.
 
@@ -179,7 +179,7 @@ Open your web browser and navigate to `http://localhost:8501`.
 * [x] **Technical Execution (15%):** Fully functional prototype displaying 13 well datasets, interactive wireline zoom plots, and live agentic AI responses.
 
 
-* [x] **User Experience UX/UI (15%):** Clean dual-layout (Top Subsurface & AVO Characterization Cards + Bottom Full-Width 3-Track Log Visualizer) with direct AI assistant interaction.
+* [x] **User Experience UX/UI (15%):** Dual-layout dashboard with 4-track wireline log visualizer, depth zoom slider, and structured AI response containers.
 
 
 * [x] **User Value (15%):** Solves core geoscientist pain points by synthesizing structured LAS logs, pre-stack AVO attributes, and DUG Insight fault interpretations into 1-click answers.
