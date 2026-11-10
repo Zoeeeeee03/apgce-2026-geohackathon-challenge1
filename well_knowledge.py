@@ -101,8 +101,11 @@ WELL_DATABASE = {
         },
         "seismic_inversion_correlation": "Correlates with Moderate Total Sand Probability.",
         "structural_interpretation": {
-            "fault_candidate": "Intersected by crestal fault zone",
-            "trap_mechanism": "Fault-disrupted anticlinal flank"
+            "fault_name": "Fault Array M1-F1, M1-F2, M1-F3 (m1 f1..f3 fault sticks)",
+            "horizon_pick": "Mapped Reservoir Reflector Array (line-1 m1 to line-17 m1 at TWT ~1.8s-2.4s)",
+            "structural_feature": "Fault-disrupted anticlinal crest with normal fault displacements of ~25ms-35ms TWT near CDP 3443",
+            "trap_mechanism": "Fault-bounded structural closure along anticlinal flank sealed against marine shale",
+            "structural_risk": "Fault seal breach and reservoir compartmentalization risk near crestal fault zone"
         },
         "recommended_next_action": "Assess compartmentalization risks near crestal fault."
     },
