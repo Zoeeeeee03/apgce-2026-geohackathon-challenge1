@@ -1,4 +1,4 @@
-# APGCE 2026 GeoHackathon — Challenge 1: Agentic AI Subsurface Exploration Copilot
+# APGCE 2026 GeoHackathon — Challenge 1: Agentic AI StrataMind
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Python](https://img.shields.io/badge/Python-3.12-blue.svg)
@@ -9,47 +9,70 @@
 ---
 
 ## 📌 Executive Summary & Project Overview
-**Exploration Copilot** is an agentic AI subsurface prospect evaluation and decision-support platform developed for the **APGCE 2026 GeoHackathon (Challenge 1)**.
+**StrataMind** is an agentic AI subsurface prospect evaluation and decision-support platform built for the **APGCE 2026 GeoHackathon (Challenge 1)**.
 
-Evaluating exploration prospects traditionally requires geoscientists to spend **2 to 3 weeks** opening fragmented software, manually parsing wireline `.las` log files, cross-referencing pre-stack AVO elastic impedance volumes, and tracing structural horizons.
+Evaluating subsurface exploration prospects traditional forces geoscientists to spend **weeks** opening fragmented software, manually parsing wireline `.las` log files, cross-referencing pre-stack AVO elastic impedance volumes, and interpreting 2D/3D seismic sections.
 
-**Exploration Copilot** bridges structured petrophysical log attributes, structural fault/horizon picks from **DUG Insight** (e.g., extensional normal fault displacements), and pre-stack AVO inversion parameters (Vp/Vs ratios, P-Impedance, S-Impedance) into a unified executive decision dashboard. Powered by an on-premises **vLLM engine (Gemma 4 26B A4B)** hosted on local HPC infrastructure, the platform guarantees **zero enterprise data leakage** while accelerating multi-well prospect screening from **weeks down to 3 seconds (95%+ productivity gain)**.
+**StrataMind** bridges structured petrophysical log attributes, 2D seismic inline cross-sections, structural horizon/fault picks from **DUG Insight** (e.g., extensional normal fault displacements and sub-unconformity truncations), and pre-stack AVO inversion parameters into a unified decision engine. Powered by an on-premises **vLLM engine (Gemma 4 26B A4B)** hosted on local HPC infrastructure paired with a **Lightweight Retrieval-Augmented Generation (RAG)** knowledge base, the platform identifies trapping mechanisms, provides evidence-backed geological reasoning, and ranks prospects while guaranteeing **zero enterprise data leakage** (accelerating prospect evaluation from weeks to **< 3 seconds**).
+
+---
+
+## 🎯 Challenge 1 Core Task & Technical Focus
+The primary task of Challenge 1 is to **identify structural vs. stratigraphic trapping mechanisms and provide rigorous geological reasoning**. 
+
+StrataMind achieves this by synthesizing cross-domain subsurface evidence:
+
+### 1. **Structural Trap Identification:** 
+
+Evaluates tectonic deformation (e.g., extensional normal fault offsets, anticlinal 3-way/4-way dip closures) where downthrown reservoir sands terminate against sealing fault planes.
+
+### 2. **Stratigraphic Trap Identification:** 
+
+Evaluates depositional facies variations, fluvial/deltaic channel sand bodies, lateral sand pinch-outs, and sub-unconformity truncations where porous sandstones are laterally and vertically sealed by tight marine mudstones.
+
+### 3. **Evidence-Based Reasoning & Citations:** 
+
+Ingests domain literature (e.g., PetroEdge trap guides, SLB subsurface glossaries, Malay Basin play analogues) via RAG to explain *why* a specific trap mechanism is formed, citing exact TWT offsets, petrophysical cutoffs, and external domain rules.
 
 ---
 
 ## 🏗️ System Architecture & Workflow
 
 ```text
-┌──────────────────────────────────────┐       ┌──────────────────────────────────────┐
-│       DUG Insight (Visual QC)        │       │      Raw Wireline LAS Datasets       │
-│  • Structural Horizon Tracing        │       │  • Log Curves (Vsh, PHIT, Sw, Sh)    │
-│  • Fault Offset Mapping (e.g. F-08)  │       │  • Pre-Stack AVO Parameters (Vp/Vs)  │
-└──────────────────┬───────────────────┘       └──────────────────┬───────────────────┘
-                   │                                              │
-                   └──────────────────────┬───────────────────────┘
+┌──────────────────────────────────────┐        ┌──────────────────────────────────────┐
+│        DUG Insight 2D/3D Picks       │        │       Raw Wireline LAS Datasets      │
+│  • 2D Seismic Inlines & Horizons     │        │  • Curve Logs (Vsh, PHIT, Sw, Sh)    │
+│  • Fault Displacement & Truncations  │        │  • Pre-Stack AVO Parameters (Vp/Vs)  │
+└──────────────────┬───────────────────┘        └──────────────────┬───────────────────┘
+                   │                                               │
+                   └──────────────────────┬────────────────────────┘
                                           ▼
-                       ┌─────────────────────────────────────┐
-                       │  Deterministic Knowledge Extractor  │
-                       │       (`generate_knowledge.py`)     │
-                       └──────────────────┬──────────────────┘
+                        ┌──────────────────────────────────┐
+                        │   Deterministic Knowledge Base   │
+                        │      (`generate_knowledge.py`)   │
+                        └─────────────────┬────────────────┘
+                                          │
                                           ▼
-                       ┌─────────────────────────────────────┐
-                       │  Immutable Grounded Data Context    │
-                       │        (`well_knowledge.py`)        │
-                       └──────────────────┬──────────────────┘
+ ┌─────────────────────────────────────────────────────────────────────────────────┐
+ │                        Lightweight RAG Knowledge Engine                         │
+ │  • Diagnostic Trap Rules (`trapping_mechanisms_guide.txt`)                      │
+ │  • Field Analogue Database (`analogue_fields.txt`)                              │
+ │  • Petroleum System Framework (`petroleum_system_framework.txt`)                │
+ └────────────────────────────────────────┬────────────────────────────────────────┘
+                                          │
                                           ▼
-                       ┌─────────────────────────────────────┐
-                       │ Streamlit Web Dashboard (`app.py`)  │
-                       │  • 4-Track Interactive Zoom Plotter │
-                       │  • Subsurface & AVO Inversion Panel │
-                       │  • Multi-Well Ranking Matrix        │
-                       │  • Directly Grounded Gemma 4 AI     │
-                       └──────────────────┬──────────────────┘
+                        ┌──────────────────────────────────┐
+                        │ Streamlit UI Dashboard (`app.py`)│
+                        │  • 2D Seismic & 4-Track LAS View │
+                        │  • Multi-Well Ranking Matrix     │
+                        │  • Right-Panel Agentic AI Chat   │
+                        └─────────────────┬────────────────┘
+                                          │
                                           ▼
-                       ┌─────────────────────────────────────┐
-                       │ Local HPC vLLM REST Inference Engine│
-                       │   (Gemma 4 26B A4B @ 172.28.34.1)   │
-                       └─────────────────────────────────────┘
+                        ┌──────────────────────────────────┐
+                        │ Local HPC vLLM REST Endpoint     │
+                        │ (Gemma 4 26B A4B @ 172.28.34.1)  │
+                        └──────────────────────────────────┘
 
 ```
 
@@ -62,58 +85,35 @@ To eliminate AI hallucinations and ensure complete technical transparency, **Exp
 
 All wireline curve plots, sample counts, net pay intervals, and quantitative petrophysical averages (Vshale, Phitotal, Sw, Sh) are parsed directly from field `.las` files using `lasio` and `pandas`.
 
-### 2. **Visual Geological Picks (100% Grounded):** 
+### 2. **Structural Seismic Picks (Ground-Truth Grounded):** 
 
-Structural normal fault parameters for **Well P-1** (e.g., `Fault P1-F08`, CDP 2200–2400, 25ms TWT displacement in well P-1) represent real seismic interpretations performed by our team in DUG Insight.
+Seismic reflector offsets (e.g., Two-Way Travel Time throw in ms along Inline/Crossline coordinates) and horizon truncations from DUG Insight are passed as immutable structural evidence. Uninterpreted candidate wells display `"Pending DUG Horizon Pick"` to enforce strict scientific integrity.
 
-### 3. **Zero-Hallucination Safe Fallbacks:**
+### 3. **Prompt-Based Literature RAG Engine:**
 
-Unmapped candidate wells explicitly display `"Pending DUG Horizon Pick"` for structural attributes to ensure the AI does not hallucinate unverified fault geometries.
+Instead of complex vector databases, domain literature files (`.txt`/`.md`) covering petroleum system elements, trapping diagnostics, and regional Malay Basin analogues are injected directly into the **Gemma 4 26B** context window. This enables the Copilot to pull relevant geological rules, compare prospects against known field analogues, and cite literature sources on demand based on user queries.
 
 ---
 
 ## 🚀 Key Technical Features & Capabilities
 
-### 1. 📊 Interactive 4-Track Wireline Log Evidence Visualizer
+### 1. 📊 Tab 1: Single Well Deep Dive & Geological Reasoning
 
-* **Lithology & Storage (Tracks 1 & 2):** Renders Vsh (Track 1) and Total Porosity (PHIT, Track 2) with color-filled reservoir pay cutoffs (Vsh < 0.30, PHIT > 0.15).
+* **Integrated Subsurface View:** Combines cropped 2D seismic inline cross-sections (highlighting fault sticks and reflector truncations) side-by-side with interactive 4-track wireline log plots (Vsh, Porosity, Hydrocarbon Saturation Sh, and Pay Flags).
 
-* **Hydrocarbon Saturation Focus (Sh = 1 - Sw, Track 3):** Replaces raw water saturation with a dedicated Hydrocarbon Saturation track highlighted by custom gold/green pay fills.
+* **Interactive Depth Zooming:** Features live depth range sliders to inspect target pay intervals against seismic travel times.
 
-* **Pay Summary Flags (Track 4):** Displays active Gas-in-Place (PS_GIP) and Oil-in-Place (PS_OIP) pay summary flags parsed directly from LAS curves.
+* **Dedicated Agentic AI Panel (Right Column):** Fixed interactive chat interface where users can ask custom questions or click suggested prompts (*"Identify Trapping Mechanism", "Explain Geological Reasoning", "Search Basin Analogues"*).
 
-* **Depth Indexing (m) & Live Slider Zooming:** Features interactive zoom sliders for precise inspection of target pay intervals (e.g., 1800m - 2500m) against DUG Insight 3D seismic sections.
-
-* **Elastic Inversion Comparison:** Track 2 supports dynamic curve selection, enabling side-by-side comparison of Porosity (PHIT), Vp/Vs velocity ratios, P-Impedance (Zp), and S-Impedance (Zs).
-
+* **Deterministic 4-Step Reasoning Trace:** Enforces AI responses to structure outputs as:
+  Data Observation --> Geological & AVO Logic --> Trap Conclusion --> Key Risks & Next Steps
 
 
-### 2. 🎯 Pre-Stack AVO & Elastic Inversion Screening Panel
+### 2. 🏆 Multi-Well Prospect Ranking Engine
 
-* **Fluid & Lithology Discrimination:** Integrates Amplitude Versus Offset (AVO) anomaly classifications (Class II-III Bright Spots) and flags low Vp/Vs ratios (< 1.7) to confirm gas/light-oil pay versus brine sands.
+* **Automated Comparative Matrix:** Aggregates petrophysical cutoffs (Vsh < 0.30, Sw < 0.50, Vp/Vs < 1.7) and structural trap seals across candidate wells.
 
-* **DUG Insight Structural Grounding:** Incorporates traced normal fault geometry (CDP offsets, Two-Way Travel Time displacement) directly into the AI prompt to evaluate fault-dependent structural closures vs. stratigraphic pinchouts.
-
-
-
-### 3. 🏆 Multi-Well Prospect Ranking Engine
-
-* Constructs an automated comparative matrix across candidate wells (`NO-1`, `EO-1`, `M-1`, `P-1`, etc.).
-
-
-* Ranks candidates dynamically based on petrophysical cutoffs (Vsh < 0.30, Sw < 0.50, Vp/Vs < 1.7) and structural trap closure.
-
-
-
-### 4. 🤖 Grounded Agentic AI Assistant (Zero Hallucination)
-
-* Communicates directly with the HPC local **vLLM Gemma 4 26B** endpoint.
-
-
-* Follows a deterministic, 4-step structured geological reasoning trace:
-
-Data Observation --> Geological & AVO Reasoning --> Prospect Conclusion --> Key Risks & Next Steps
-
+* **Executive Decision Support:** Allows asset teams to instantly prioritize high-confidence drilling targets and de-risk multi-well exploration campaigns.
 
 
 ---
@@ -173,26 +173,25 @@ Open your web browser and navigate to `http://localhost:8501`.
 
 ## 🏆 Scoring Criteria Alignment Checklist
 
-* [x] **Technical Design (15%):** Modular architecture connecting `lasio` parsers, grounded dictionaries, local vLLM API, and Streamlit UI.
+* [x] **Technical Design (15%):** Modular architecture connecting `lasio` parsers, lightweight literature RAG text context, local vLLM API, and Streamlit UI.
 
 
-* [x] **Technical Execution (15%):** Fully functional prototype displaying 13 well datasets, interactive wireline zoom plots, and live agentic AI responses.
+* [x] **Technical Execution (15%):** Fully functional dual-tab dashboard featuring 2D seismic inline displays, interactive wireline zoom plots, and grounded AI responses.
 
 
-* [x] **User Experience UX/UI (15%):** Dual-layout dashboard with 4-track wireline log visualizer, depth zoom slider, and structured AI response containers.
+* [x] **User Experience UX/UI (15%):** Intuitive layout pairing visual seismic/well evidence on the left with a dedicated AI Copilot reasoning panel on the right.
 
 
-* [x] **User Value (15%):** Solves core geoscientist pain points by synthesizing structured LAS logs, pre-stack AVO attributes, and DUG Insight fault interpretations into 1-click answers.
+* [x] **User Value (15%):** Direct alignment with Challenge 1 by automating trap identification and providing step-by-step geological logic.
 
 
-* [x] **Business Impact (20%):** Quantified $10M+ dry-hole risk mitigation and 95% time reduction for energy operators.
+* [x] **Business Impact (20%):** Quantified $10M+ dry-hole risk mitigation and 95% time reduction for subsurface exploration teams.
 
 
-* [x] **Innovation & Creativity (10%):** Agentic AI prospect ranking de-risks multi-well exploration through transparent, evidence-backed reasoning chains.
+* [x] **Innovation & Creativity (10%):** Prompt-based RAG integration that fuses domain literature, AVO inversion, and DUG Insight picks into conversational AI.
 
 
-* [x] **Presentation & Storytelling (10%):** Executive dashboard layout tailored for both technical engineers and business decision-makers.
-
+* [x] **Presentation & Storytelling (10%):** Tailored dashboard layout supporting quick 2-to-3 minute live pitches and executive demonstrations.
 
 
 ---
