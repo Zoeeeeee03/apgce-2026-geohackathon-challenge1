@@ -42,7 +42,7 @@ from PIL import Image
 # ============================================================
 
 st.set_page_config(
-    page_title="StrataMind | Subsurface Exploration Copilot",
+    page_title="StrataMind | StrataMind",
     page_icon="🌍",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -501,6 +501,7 @@ CURVE_ALIASES = {
     ],
     "VSH": ["VSH", "VCL", "VCLAY"],
     "PHIT": ["PHIT", "PHI", "POR"],
+    "SW": ["SW", "SWE", "SWT", "SW_ARCHIE"],
     "SH": ["SH", "SHC", "SH_HC"],
     "PAY": ["PAY", "PAY_FLAG", "NET_PAY_FLAG"]
 }
@@ -758,12 +759,21 @@ def calculate_petrophysical_curves(df, detected, params):
         if sh is not None:
 
             sh = to_fraction(sh)
+
+            # Store SH as a processed curve for plotting
+            df["SH_CALC"] = sh
+            detected["SH"] = "SH_CALC"
+
+            # Derive SW internally from existing SH
+            sw = 1 - sh
+
             status.append("SH: Existing LAS curve")
+            status.append("SW: Derived internally from SH")
 
         else:
 
             status.append(
-                "SH: Cannot calculate without SW"
+                "SH: Cannot calculate; SW or SH is required"
             )
 
     # --------------------------------------------------------
@@ -1694,6 +1704,8 @@ for well in ALL_WELLS:
         }
 
 
+
+
 def render_4track_plotly_light(df_log=None):
 
     if df_log is None:
@@ -1705,26 +1717,36 @@ def render_4track_plotly_light(df_log=None):
     if depth_column not in df_log.columns:
         return None
 
-    # Four displayed tracks
+    # Required four displayed tracks
     preferred_curves = ["VSH", "PHIT", "SH", "PAY"]
 
-    available_curves = [
-        curve for curve in preferred_curves
-        if curve in detected
-        and detected[curve] in df_log.columns
-    ]
+    # Check both detected mapping and common calculated column names
+    curve_columns = {
+        "VSH": ["VSH", "VSH_CALC"],
+        "PHIT": ["PHIT", "PHIT_CALC"],
+        "SH": ["SH", "SH_CALC"],
+        "PAY": ["PAY", "PAY_FLAG"]
+    }
+
+    available_curves = {}
+
+    for curve in preferred_curves:
+
+        candidates = []
+
+        if curve in detected:
+            candidates.append(detected[curve])
+
+        candidates.extend(curve_columns[curve])
+
+        for column in candidates:
+
+            if column in df_log.columns:
+                available_curves[curve] = column
+                break
 
     if not available_curves:
         return None
-
-    params = st.session_state.get("PETRO_PARAMS", {})
-
-    vsh_cutoff = params.get("vsh_cutoff", 0.40)
-    phit_cutoff = params.get("phit_cutoff", 0.10)
-    sw_cutoff = params.get("sw_cutoff", 0.60)
-
-    # SH cutoff = 1 - SW cutoff
-    sh_cutoff = 1.0 - sw_cutoff
 
     colours = {
         "VSH": "#558b2f",
@@ -1733,32 +1755,74 @@ def render_4track_plotly_light(df_log=None):
         "PAY": "#d32f2f"
     }
 
+    params = st.session_state.get("PETRO_PARAMS", {})
+
     cutoff_values = {
-        "VSH": vsh_cutoff,
-        "PHIT": phit_cutoff,
-        "SH": sh_cutoff
+        "VSH": params.get("vsh_cutoff", 0.40),
+        "PHIT": params.get("phit_cutoff", 0.10),
+        "SH": 1 - params.get("sw_cutoff", 0.60)
     }
 
     fig = make_subplots(
         rows=1,
         cols=len(available_curves),
         shared_yaxes=True,
-        subplot_titles=available_curves,
+        subplot_titles=list(available_curves.keys()),
         horizontal_spacing=0.06
     )
 
-    for i, curve in enumerate(available_curves):
+    for i, (curve, column_name) in enumerate(
+        available_curves.items()
+    ):
 
         col = i + 1
-        column_name = detected[curve]
 
-        if curve == "PAY":
+        curve_values = pd.to_numeric(
+            df_log[column_name],
+            errors="coerce"
+        )
 
-            # Display PAY as a binary track
-            pay_values = pd.to_numeric(
-                df_log[column_name],
-                errors="coerce"
-            ).fillna(0)
+        if curve in ["VSH", "PHIT", "SH"]:
+
+            fig.add_trace(
+                go.Scatter(
+                    x=curve_values,
+                    y=df_log[depth_column],
+                    mode="lines",
+                    name=curve,
+                    line=dict(
+                        color=colours[curve],
+                        width=1.5
+                    ),
+                    connectgaps=False
+                ),
+                row=1,
+                col=col
+            )
+
+            cutoff = cutoff_values[curve]
+
+            fig.add_vline(
+                x=cutoff,
+                line_dash="dash",
+                line_color="#d32f2f",
+                line_width=2,
+                row=1,
+                col=col
+            )
+
+            fig.update_xaxes(
+                range=[0, 1],
+                title_text=curve,
+                showgrid=True,
+                gridcolor="#D0D0D0",
+                row=1,
+                col=col
+            )
+
+        elif curve == "PAY":
+
+            pay_values = curve_values.fillna(0)
 
             fig.add_trace(
                 go.Scatter(
@@ -1784,70 +1848,6 @@ def render_4track_plotly_light(df_log=None):
                 tickvals=[0, 1],
                 ticktext=["Non-pay", "Pay"],
                 title_text="Pay Flag",
-                row=1,
-                col=col
-            )
-
-        else:
-
-            curve_values = pd.to_numeric(
-                df_log[column_name],
-                errors="coerce"
-            )
-
-            fig.add_trace(
-                go.Scatter(
-                    x=curve_values,
-                    y=df_log[depth_column],
-                    mode="lines",
-                    name=curve,
-                    line=dict(
-                        color=colours[curve],
-                        width=1.5
-                    ),
-                    connectgaps=False
-                ),
-                row=1,
-                col=col
-            )
-
-            cutoff = cutoff_values.get(curve)
-
-            if cutoff is not None:
-
-                fig.add_vline(
-                    x=cutoff,
-                    line_dash="dash",
-                    line_color="#d32f2f",
-                    line_width=2,
-                    row=1,
-                    col=col
-                )
-
-                fig.add_annotation(
-                    x=cutoff,
-                    y=1,
-                    yref="paper",
-                    text=f"Cutoff: {cutoff:.2f}",
-                    showarrow=False,
-                    textangle=-90,
-                    xanchor="left",
-                    yanchor="top",
-                    font=dict(
-                        size=9,
-                        color="#d32f2f"
-                    ),
-                    row=1,
-                    col=col
-                )
-
-            fig.update_xaxes(
-                range=[0, 1],
-                showgrid=True,
-                gridcolor="#D0D0D0",
-                showline=True,
-                mirror=True,
-                zeroline=False,
                 row=1,
                 col=col
             )
@@ -1880,9 +1880,6 @@ def render_4track_plotly_light(df_log=None):
     )
 
     return fig
-
-
-
 
 # ============================================================
 # 7. BUILD GEMMA API MESSAGES
@@ -2074,7 +2071,7 @@ with st.sidebar:
             🌍 StrataMind
         </h2>
         <p style="color:#888B80;font-size:13px;">
-            Subsurface Exploration Copilot
+            StrataMind
         </p>
         """,
         unsafe_allow_html=True
@@ -2214,17 +2211,16 @@ with st.sidebar:
         "phit_cutoff": phit_cutoff,
         "sw_cutoff": sw_cutoff
     }
-st.session_state["PETRO_PARAMS"] = PETRO_PARAMS
 
     if st.button(
         "🗑️ Clear Current Conversation",
         use_container_width=True
     ):
-
         current_conversation()["messages"] = []
         current_conversation()["title"] = "New conversation"
-
         st.rerun()
+
+st.session_state["PETRO_PARAMS"] = PETRO_PARAMS
 
 
 # ============================================================
@@ -2357,7 +2353,8 @@ with well_col:
             # ------------------------------------------------
 
             st.markdown("#### Well Log Curves")
-
+    
+            
             well_fig = render_4track_plotly_light(
                 well_log_df
             )
@@ -2386,7 +2383,7 @@ with well_col:
                         "DT": "Sonic Travel Time: measures the time taken for an acoustic wave to travel through the formation.",
                         "VSH": "Volume of Shale: estimated proportion of shale in the formation.",
                         "PHIT": "Total Porosity: estimated total pore-space fraction.",
-                         “SH": "Hydrocarbon Saturation: estimated fraction of pore space occupied by hydrocarbons.",
+                         "SH": "Hydrocarbon Saturation: estimated fraction of pore space occupied by hydrocarbons.",
                         "PAY": "Pay Indicator: identifies intervals satisfying the selected petrophysical cut-offs."
                     }
 
@@ -3984,73 +3981,6 @@ if question:
 
                 attachments.append({
                     "name": "Loaded seismic section image",
-                    "kind": "image",
-                    "image_bytes": seismic_image_bytes,
-                    "mime_type": "image/png"
-                })
-
-            except Exception as image_error:
-
-                st.warning(
-                    f"Unable to create seismic image for AI analysis: "
-                    f"{image_error}"
-                )
-
-    # --------------------------------------------------------
-    # CREATE USER MESSAGE
-    # --------------------------------------------------------
-
-    user_message = {
-        "role": "user",
-        "text": question,
-        "attachments": attachments
-    }
-
-    conversation["messages"].append(user_message)
-
-    # Set conversation title
-    if len(conversation["messages"]) == 1:
-
-        conversation["title"] = (
-            question[:35] + "..."
-            if len(question) > 35
-            else question
-        )
-
-    # --------------------------------------------------------
-    # GENERATE ORIGINAL GEMMA RESPONSE
-    # --------------------------------------------------------
-
-    with st.spinner(
-        "StrataMind is analysing your geological data..."
-    ):
-
-        try:
-
-            answer = generate_ai_response(
-                conversation["messages"],
-                selected_well
-            )
-
-        except Exception as e:
-
-            answer = (
-                "⚠️ Gemma could not complete the request.\n\n"
-                f"Error: `{e}`\n\n"
-                "Please check the model connection and "
-                "ensure the vLLM server is running."
-            )
-
-    # Save assistant response
-    conversation["messages"].append({
-        "role": "assistant",
-        "text": answer
-    })
-
-    st.rerun()
-
-
-: "Loaded seismic section image",
                     "kind": "image",
                     "image_bytes": seismic_image_bytes,
                     "mime_type": "image/png"
