@@ -1,120 +1,122 @@
-# APGCE 2026 GeoHackathon — Challenge 1: Agentic AI StrataMind
+# 🌍 StrataMind AI — Subsurface Exploration Copilot (APGCE 2026 GeoHackathon — Challenge 1)
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Python](https://img.shields.io/badge/Python-3.12-blue.svg)
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.32+-red.svg)
 ![vLLM](https://img.shields.io/badge/LLM-Gemma--4--26B--A4B-green.svg)
-![Platform](https://img.shields.io/badge/Platform-DUG%20HPC%20Linux-orange.svg)
+
+**An Agentic AI Subsurface Exploration Assistant that fuses 2D Seismic Volumes, Well-Tie Checkshots, 1D Wireline Petrophysics, and Analogue Field Knowledge to detect, validate, and explain hydrocarbon traps.**
 
 ---
 
-## 📌 Executive Summary & Project Overview
-**StrataMind** is an agentic AI subsurface prospect evaluation and decision-support platform built for the **APGCE 2026 GeoHackathon (Challenge 1)**.
-
-Evaluating subsurface exploration prospects traditional forces geoscientists to spend **weeks** opening fragmented software, manually parsing wireline `.las` log files, cross-referencing pre-stack AVO elastic impedance volumes, and interpreting 2D/3D seismic sections.
-
-**StrataMind** bridges structured petrophysical log attributes, 2D seismic inline cross-sections, structural horizon/fault picks from **DUG Insight** (e.g., extensional normal fault displacements and sub-unconformity truncations), and pre-stack AVO inversion parameters into a unified decision engine. Powered by an on-premises **vLLM engine (Gemma 4 26B A4B)** hosted on local HPC infrastructure paired with a **Lightweight Retrieval-Augmented Generation (RAG)** knowledge base, the platform identifies trapping mechanisms, provides evidence-backed geological reasoning, and ranks prospects while guaranteeing **zero enterprise data leakage** (accelerating prospect evaluation from weeks to **< 3 seconds**).
-
----
-
-## 🎯 Challenge 1 Core Task & Technical Focus
-The primary task of Challenge 1 is to **identify structural vs. stratigraphic trapping mechanisms and provide rigorous geological reasoning**. 
-
-StrataMind achieves this by synthesizing cross-domain subsurface evidence:
-
-### 1. **Structural Trap Identification:** 
-
-Evaluates tectonic deformation (e.g., extensional normal fault offsets, anticlinal 3-way/4-way dip closures) where downthrown reservoir sands terminate against sealing fault planes.
-
-### 2. **Stratigraphic Trap Identification:** 
-
-Evaluates depositional facies variations, fluvial/deltaic channel sand bodies, lateral sand pinch-outs, and sub-unconformity truncations where porous sandstones are laterally and vertically sealed by tight marine mudstones.
-
-### 3. **Evidence-Based Reasoning & Citations:** 
-
-Ingests domain literature (e.g., PetroEdge trap guides, SLB subsurface glossaries, Malay Basin play analogues) via RAG to explain *why* a specific trap mechanism is formed, citing exact TWT offsets, petrophysical cutoffs, and external domain rules.
+## 🎯 1. What Problem Are We Solving?
+Subsurface exploration teams spend **2 to 3 weeks** per prospect manually switching across fragmented software to correlate 2D seismic sections with wireline logs and historical analogue studies:
+* **Seismic Ambiguity (False Positives):** 2D seismic sections reveal numerous structural and stratigraphic features—fault displacements, discontinuities, channels, onlaps, and erosional truncations—but seismic geometry alone cannot distinguish **true hydrocarbon-charged traps** from **brine-wet sands or acquisition noise**.
+* **Siloed Data Interpretation:** Well logs (`.las`), seismic stack volumes (`.sgy`), time-depth checkshots (`.txt`), and analogue field literature live in disconnected workflows.
+* **Lack of Explainability:** Conventional automated tools flag anomalies without explaining the step-by-step geological logic connecting trap geometry, reservoir quality, and top/lateral seal integrity.
 
 ---
 
-## 🏗️ System Architecture & Workflow
+## 👥 2. Who Are We Solving It For?
+* **Exploration Geoscientists & Geophysicists:** Accelerating 2D seismic-to-well tie QC, structural vs. stratigraphic trap screening, and depth-specific petrophysical validation.
+* **Subsurface Asset Teams & Decision-Makers:** De-risking prospect maturation with auditable, evidence-backed geological reasoning and analogue field comparisons before committing drilling capital.
+
+---
+
+## ⚙️ 3. How Does Our Solution Work?
+**StrataMind AI** is an interactive, modular Streamlit exploration workbench powered by an on-premises **vLLM inference engine (`google/gemma-4-26B-A4B-it`)** running on local HPC infrastructure (`http://172.28.34.1:8000/v1`) for **zero enterprise data leakage**.
+
+### End-to-End Subsurface Workflow
+1. **1D Wireline Log Ingestion & 4-Track Visualizer (`.las`):**
+   * Users upload any target well `.las` dataset to dynamically generate a **4-Track Wireline Log** with interactive depth zooming:
+     * **Track 1 — Lithology (`VSH`):** Identifies clean reservoir sands (Vsh} < 0.30) vs. regional sealing shales.
+     * **Track 2 — Storage Capacity (`PHIT`):** Highlights high-porosity reservoir intervals (Phi > 0.15).
+     * **Track 3 — Hydrocarbon Saturation (Sh = 1 - Swt):** Isolates hydrocarbon-charged pay zones (Sh > 0.50) from brine-saturated intervals.
+     * **Track 4 — Pay Summary Flags (`PS_GIP` / `PS_OIP`):** Displays active gas and oil pay indicators.
+2. **2D Seismic Stack & Checkshot Well-Tie Viewer (`.sgy` + `checkshot.txt`):**
+   * Users upload a 2D seismic stack volume (`.sgy`) to render an interactive HTML seismic cross-section directly in the interface.
+   * Users can optionally upload a well checkshot file (`checkshot.txt`) to perform time-depth conversion and **overlay the well trajectory directly onto the 2D seismic stack**, aligning log depth intervals with seismic Two-Way Travel Time (TWT) reflectors.
+3. **Cross-Domain Trap Detection & False-Positive Filtering (`StrataMind AI Chatbox`):**
+   * **Step A — Seismic Geometry Screening:** StrataMind analyzes seismic discontinuities, fault offsets, channelized bodies, onlaps, and horizon truncations to nominate candidate structural or stratigraphic trap locations.
+   * **Step B — Petrophysical & Seal Verification:** To eliminate brine sands and seismic noise, the AI cross-checks nominated seismic zones against the 1D well log curves—verifying reservoir porosity (`PHIT`), hydrocarbon saturation (`SH`), and overlying/adjacent shale seals (`VSH`).
+   * **Step C — Explainable Reasoning & Analogue Grounding:** Using a structured RAG knowledge base (`resource_library.py` & `wellknowledge2.py`), StrataMind explains *why* a feature forms a valid structural or stratigraphic trap, compares it against known analogue fields, and recommends next exploration steps.
+
+---
+
+## 🏗️ System Architecture
 
 ```text
-┌──────────────────────────────────────┐        ┌──────────────────────────────────────┐
-│        DUG Insight 2D/3D Picks       │        │       Raw Wireline LAS Datasets      │
-│  • 2D Seismic Inlines & Horizons     │        │  • Curve Logs (Vsh, PHIT, Sw, Sh)    │
-│  • Fault Displacement & Truncations  │        │  • Pre-Stack AVO Parameters (Vp/Vs)  │
-└──────────────────┬───────────────────┘        └──────────────────┬───────────────────┘
-                   │                                               │
-                   └──────────────────────┬────────────────────────┘
-                                          ▼
-                        ┌──────────────────────────────────┐
-                        │   Deterministic Knowledge Base   │
-                        │      (`generate_knowledge.py`)   │
-                        └─────────────────┬────────────────┘
-                                          │
-                                          ▼
- ┌─────────────────────────────────────────────────────────────────────────────────┐
- │                        Lightweight RAG Knowledge Engine                         │
- │  • Diagnostic Trap Rules (`trapping_mechanisms_guide.txt`)                      │
- │  • Field Analogue Database (`analogue_fields.txt`)                              │
- │  • Petroleum System Framework (`petroleum_system_framework.txt`)                │
- └────────────────────────────────────────┬────────────────────────────────────────┘
-                                          │
-                                          ▼
-                        ┌──────────────────────────────────┐
-                        │ Streamlit UI Dashboard (`app.py`)│
-                        │  • 2D Seismic & 4-Track LAS View │
-                        │  • Multi-Well Ranking Matrix     │
-                        │  • Right-Panel Agentic AI Chat   │
-                        └─────────────────┬────────────────┘
-                                          │
-                                          ▼
-                        ┌──────────────────────────────────┐
-                        │ Local HPC vLLM REST Endpoint     │
-                        │ (Gemma 4 26B A4B @ 172.28.34.1)  │
-                        └──────────────────────────────────┘
+┌───────────────────────────────┐   ┌───────────────────────────────┐   ┌───────────────────────────────┐
+│   1D Well Log Upload (.las)   │   │  2D Seismic Stack (.sgy) &    │   │  Analogue & Domain Knowledge  │
+│  • VSH, PHIT, SWT -> SH       │   │  Well Checkshot (.txt)        │   │  • Trap Diagnostic Rules      │
+│  • Pay Flags (PS_GIP/PS_OIP)  │   │  • Interactive HTML Stack     │   │  • DUG Structural/AVO Picks   │
+│  • 4-Track Log Plotter        │   │  • Time-Depth Well Overlay    │   │  • Analogue Field Library     │
+└───────────────┬───────────────┘   └───────────────┬───────────────┘   └───────────────┬───────────────┘
+                │                                   │                                   │
+                └───────────────────────────────────┼───────────────────────────────────┘
+                                                    ▼
+                                 ┌─────────────────────────────────────┐
+                                 │  StrataMind Multimodal Context &    │
+                                 │  Seismic-Well Cross-Validator       │
+                                 │  (`seismicprocessing.py` & loaders) │
+                                 └──────────────────┬──────────────────┘
+                                                    ▼
+                                 ┌─────────────────────────────────────┐
+                                 │   Local HPC vLLM Inference Engine   │
+                                 │    (Gemma 4 26B A4B — Zero Leak)    │
+                                 └──────────────────┬──────────────────┘
+                                                    ▼
+                                 ┌─────────────────────────────────────┐
+                                 │   Streamlit Workbench (`idkkk.py`)  │
+                                 │  • 1D Log + 2D Seismic Side-by-Side │
+                                 │  • Trap Location Suggestions        │
+                                 │  • Conversational Geo-Reasoning     │
+                                 └─────────────────────────────────────┘
 
 ```
 
 ---
 
-## 🛡️ Data Grounding & Verification Standard
-To eliminate AI hallucinations and ensure complete technical transparency, **Exploration Copilot** categorizes its subsurface inputs into three grounded tiers:
+## 💡 4. What Makes It Innovative?
 
-### 1. **Automated Real Data (100% Computed):** 
+* **Seismic-to-Log Cross-Validation (Noise & Brine Filtering):** Instead of relying solely on seismic geometry—which often misclassifies water-wet sands or noise as prospects—StrataMind pairs 2D seismic features (faults, onlaps, truncations, channels) with 1D well-log petrophysics (`VSH`, `PHIT`, `SH`) to confirm both **trap closure** and **hydrocarbon charge**.
+* **Interactive Checkshot Well-Tie Overlay:** Bridges the depth-vs-time gap directly in the browser by overlaying uploaded `checkshot.txt` well paths onto `.sgy` seismic sections.
+* **Explainable 4-Step Geoscientific Reasoning:** Enforces transparent, auditable outputs:
 
-All wireline curve plots, sample counts, net pay intervals, and quantitative petrophysical averages (Vshale, Phitotal, Sw, Sh) are parsed directly from field `.las` files using `lasio` and `pandas`.
+1. Subsurface Observation --> 2. Trap Diagnosis (Structural vs. Stratigraphic) --> 3. Geological & Analogue Logic --> 4. Seal Risks & Next Steps
 
-### 2. **Structural Seismic Picks (Ground-Truth Grounded):** 
 
-Seismic reflector offsets (e.g., Two-Way Travel Time throw in ms along Inline/Crossline coordinates) and horizon truncations from DUG Insight are passed as immutable structural evidence. Uninterpreted candidate wells display `"Pending DUG Horizon Pick"` to enforce strict scientific integrity.
-
-### 3. **Prompt-Based Literature RAG Engine:**
-
-Instead of complex vector databases, domain literature files (`.txt`/`.md`) covering petroleum system elements, trapping diagnostics, and regional Malay Basin analogues are injected directly into the **Gemma 4 26B** context window. This enables the Copilot to pull relevant geological rules, compare prospects against known field analogues, and cite literature sources on demand based on user queries.
+* **On-Premise Sovereign AI:** Powered by local HPC **Gemma 4 26B**, ensuring proprietary `.sgy` and `.las` datasets never leave the enterprise network.
 
 ---
 
-## 🚀 Key Technical Features & Capabilities
+## 📈 5. Value & Impact Created
 
-### 1. 📊 Tab 1: Single Well Deep Dive & Geological Reasoning
+* **95%+ Faster Prospect Evaluation:** Compresses multi-domain seismic-well correlation, trap screening, and analogue lookup from **2–3 weeks down to seconds**.
+* **Mitigates Multi-Million-Dollar Dry-Hole Risk:** Filters out brine-bearing anomalies and breached fault compartments early by requiring simultaneous seismic trap geometry, seal presence, and hydrocarbon saturation validation.
+* **Collaborative Human-AI Workflow:** Empowers geoscientists to interrogate specific seismic regions and depth intervals conversationally while retaining full visual control over raw logs and seismic sections.
 
-* **Integrated Subsurface View:** Combines cropped 2D seismic inline cross-sections (highlighting fault sticks and reflector truncations) side-by-side with interactive 4-track wireline log plots (Vsh, Porosity, Hydrocarbon Saturation Sh, and Pay Flags).
+---
 
-* **Interactive Depth Zooming:** Features live depth range sliders to inspect target pay intervals against seismic travel times.
+## ✅ 6. Why Believe in Our Solution?
 
-* **Dedicated Agentic AI Panel (Right Column):** Fixed interactive chat interface where users can ask custom questions or click suggested prompts (*"Identify Trapping Mechanism", "Explain Geological Reasoning", "Search Basin Analogues"*).
+* **Live Working Prototype:** End-to-end Streamlit application processing real `.las` well logs, `.sgy` seismic stack volumes, `checkshot.txt` time-depth tables, and DUG Insight structural/AVO interpretations.
+* **Hybrid Deterministic + Generative Design:** All log tracks, cutoffs, seismic cropping/rendering (`seismicprocessing.py`), and well-tie projections are computed deterministically in Python, while Gemma 4 synthesizes cross-domain geological explanations grounded in `resource_library.py` and `wellknowledge2.py`.
+* **Built-In Scientific Integrity:** Explicitly distinguishes verified well/seismic observations from unmapped intervals so the AI never fabricates unverified subsurface structures.
 
-* **Deterministic 4-Step Reasoning Trace:** Enforces AI responses to structure outputs as:
-  Data Observation --> Geological & AVO Logic --> Trap Conclusion --> Key Risks & Next Steps
+---
 
+## 📂 Project Structure
 
-### 2. 🏆 Multi-Well Prospect Ranking Engine
+```text
+├── idkkk.py                        # Main Streamlit application (1D well log, 2D seismic stack viewer, & StrataMind AI chatbox)
+├── wellknowledge2.py             # Ground-truth well database, AVO attributes & DUG structural picks
+├── interpretation_data_loader.py # Seismic (.sgy), checkshot (.txt), & subsurface data loaders
+├── seismicprocessing.py          # Seismic cropping, HTML visualization & annotation utilities
+├── resource_library.py           # Analogue field knowledge & geological reference library
+└── README.md                     # Project documentation
 
-* **Automated Comparative Matrix:** Aggregates petrophysical cutoffs (Vsh < 0.30, Sw < 0.50, Vp/Vs < 1.7) and structural trap seals across candidate wells.
-
-* **Executive Decision Support:** Allows asset teams to instantly prioritize high-confidence drilling targets and de-risk multi-well exploration campaigns.
-
+```
 
 ---
 
@@ -122,17 +124,10 @@ Instead of complex vector databases, domain literature files (`.txt`/`.md`) cove
 
 ### Prerequisites
 
-* **Python Version:** 3.10+
+* **Python:** 3.10+
+* **Network:** Access to local HPC vLLM endpoint (`http://172.28.34.1:8000/v1`)
 
-
-* **Operating System:** Linux (Rocky Linux / Ubuntu) or macOS / Windows
-
-
-* **Network Access:** Connected to local HPC network (`http://172.28.34.1:8000/v1` vLLM Endpoint)
-
-
-
-### 1. Clone the Public Repository
+### 1. Clone the Repository
 
 ```bash
 git clone [https://github.com/Zoeeeeee03/apgce-2026-geohackathon-challenge1.git](https://github.com/Zoeeeeee03/apgce-2026-geohackathon-challenge1.git)
@@ -140,62 +135,40 @@ cd apgce-2026-geohackathon-challenge1
 
 ```
 
-### 2. Install Python Dependencies
+### 2. Install Dependencies
 
 ```bash
-pip install streamlit pandas numpy matplotlib lasio openai
+pip install streamlit lasio segyio pandas numpy matplotlib plotly openai
 
 ```
 
-### 3. Generate Knowledge Base & Launch Application
+### 3. Launch the Application
 
 ```bash
-# 1. Parse raw LAS files into structured JSON context
-python3 generate_knowledge.py
-
-# 2. Start the Streamlit web dashboard
-streamlit run app.py
+streamlit run idkkk.py
 
 ```
 
-Open your web browser and navigate to `http://localhost:8501`.
+1. Open your browser at `http://localhost:8501`.
+2. **Upload `.las` file** in the 1D Well Log panel to inspect the 4-track petrophysical logs.
+3. **Upload `.sgy` stack volume** (and optional `checkshot.txt`) in the 2D Seismic panel to visualize the seismic section and well overlay.
+4. **Query the StrataMind AI Chatbox** to detect candidate trap locations, differentiate structural vs. stratigraphic traps, and inspect step-by-step geological reasoning.
 
 ---
 
-## 💼 Business ROI & Investor Impact
+## 🏆 Challenge 1 Judging Alignment
 
-| Value Metric | Traditional Workflow | Exploration Copilot Solution | Business Value Created |
-| :--- | :--- | :--- | :--- |
-| **Screening Speed** | 2–3 weeks per prospect | **< 3 seconds per well** | **95%+ Productivity Savings** |
-| **Capital Risk Gate** | Manual PDF/Log checks | Automated Net Pay & Vp/Vs cutoffs | **Mitigates $10M+ Dry Hole Risk** |
-| **Data Security** | Risk of third-party cloud leaks | Local HPC vLLM (Gemma 4) | **Zero Enterprise Data Leakage** |
-| **Workflow Ecosystem** | Disconnected tools and spreadsheets | Streamlit UI + DUG Insight Co-Pilot layer | **Seamless Technical/Executive Adoption** |
-
-## 🏆 Scoring Criteria Alignment Checklist
-
-* [x] **Technical Design (15%):** Modular architecture connecting `lasio` parsers, lightweight literature RAG text context, local vLLM API, and Streamlit UI.
-
-
-* [x] **Technical Execution (15%):** Fully functional dual-tab dashboard featuring 2D seismic inline displays, interactive wireline zoom plots, and grounded AI responses.
-
-
-* [x] **User Experience UX/UI (15%):** Intuitive layout pairing visual seismic/well evidence on the left with a dedicated AI Copilot reasoning panel on the right.
-
-
-* [x] **User Value (15%):** Direct alignment with Challenge 1 by automating trap identification and providing step-by-step geological logic.
-
-
-* [x] **Business Impact (20%):** Quantified $10M+ dry-hole risk mitigation and 95% time reduction for subsurface exploration teams.
-
-
-* [x] **Innovation & Creativity (10%):** Prompt-based RAG integration that fuses domain literature, AVO inversion, and DUG Insight picks into conversational AI.
-
-
-* [x] **Presentation & Storytelling (10%):** Tailored dashboard layout supporting quick 2-to-3 minute live pitches and executive demonstrations.
-
+* **Technical Design & Execution (30%):** Modular pipeline combining `lasio` log parsing, `segyio` seismic visualization, checkshot well-tie projection, analogue RAG grounding, and local vLLM inference.
+* **User Experience UX/UI (15%):** Side-by-side 1D wireline log + 2D HTML seismic viewer paired with an interactive conversational copilot.
+* **User Value & Business Impact (35%):** Directly solves false-positive seismic screening by cross-validating trap geometry with petrophysical seal and saturation data, cutting screening time by 95%+.
+* **Innovation & Storytelling (20%):** Seamlessly connects seismic discontinuities/stratigraphic features with well-log fluid verification and analogue field reasoning.
 
 ---
 
 ## 📄 License
 
-This repository is open-sourced under the **MIT License**.
+This project is open-sourced under the **MIT License**.
+
+```
+
+```
