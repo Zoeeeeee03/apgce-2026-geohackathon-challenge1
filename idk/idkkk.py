@@ -294,7 +294,6 @@ INTERPRETATION RULES:
     reflection patterns and their relative positions.
 """
 
-
 # ============================================================
 # 4. APPLICATION DESIGN
 # ============================================================
@@ -502,7 +501,6 @@ CURVE_ALIASES = {
     ],
     "VSH": ["VSH", "VCL", "VCLAY"],
     "PHIT": ["PHIT", "PHI", "POR"],
-    "SW": ["SW", "SWE", "SWT", "SW_ARCHIE"],
     "SH": ["SH", "SHC", "SH_HC"],
     "PAY": ["PAY", "PAY_FLAG", "NET_PAY_FLAG"]
 }
@@ -1701,98 +1699,158 @@ def render_4track_plotly_light(df_log=None):
     if df_log is None:
         return None
 
-    detected = st.session_state.get(
-        "detected_curves", {}
-    )
-
+    detected = st.session_state.get("detected_curves", {})
     depth_column = detected.get("DEPTH", "DEPTH")
 
     if depth_column not in df_log.columns:
         return None
 
-    # Display up to five curves in two columns
-    preferred_curves = [
-        "GR", "RT", "RHOB", "NPHI", "DT",
-        "VSH", "PHIT", "SW", "SH", "PAY"
-    ]
+    # Four displayed tracks
+    preferred_curves = ["VSH", "PHIT", "SH", "PAY"]
 
     available_curves = [
         curve for curve in preferred_curves
         if curve in detected
         and detected[curve] in df_log.columns
-    ][:5]
+    ]
 
     if not available_curves:
         return None
 
+    params = st.session_state.get("PETRO_PARAMS", {})
+
+    vsh_cutoff = params.get("vsh_cutoff", 0.40)
+    phit_cutoff = params.get("phit_cutoff", 0.10)
+    sw_cutoff = params.get("sw_cutoff", 0.60)
+
+    # SH cutoff = 1 - SW cutoff
+    sh_cutoff = 1.0 - sw_cutoff
+
     colours = {
-        "GR": "#2e7d32",
-        "RT": "#1565c0",
-        "RHOB": "#c62828",
-        "NPHI": "#00838f",
-        "DT": "#6a1b9a",
         "VSH": "#558b2f",
         "PHIT": "#ef6c00",
-        "SW": "#ad1457",
         "SH": "#4527a0",
-        "PAY": "#d97706"
+        "PAY": "#d32f2f"
     }
 
-    number_of_rows = (len(available_curves) + 1) // 2
-
-    subplot_specs = []
-
-    for row in range(number_of_rows):
-
-        if row == number_of_rows - 1 and len(available_curves) % 2 == 1:
-            subplot_specs.append([{}, None])
-        else:
-            subplot_specs.append([{}, {}])
+    cutoff_values = {
+        "VSH": vsh_cutoff,
+        "PHIT": phit_cutoff,
+        "SH": sh_cutoff
+    }
 
     fig = make_subplots(
-        rows=number_of_rows,
-        cols=2,
+        rows=1,
+        cols=len(available_curves),
         shared_yaxes=True,
         subplot_titles=available_curves,
-        vertical_spacing=0.15,
-        horizontal_spacing=0.13,
-        specs=subplot_specs
+        horizontal_spacing=0.06
     )
 
     for i, curve in enumerate(available_curves):
 
-        row = (i // 2) + 1
-        col = (i % 2) + 1
-
+        col = i + 1
         column_name = detected[curve]
 
-        fig.add_trace(
-            go.Scatter(
-                x=df_log[column_name],
-                y=df_log[depth_column],
-                mode="lines",
-                name=curve,
-                line=dict(
-                    color=colours.get(curve, "#333333"),
-                    width=1.3,
-                    shape="hv" if curve == "PAY" else "linear"
-                ),
-                connectgaps=False
-            ),
-            row=row,
-            col=col
-        )
+        if curve == "PAY":
 
-        fig.update_xaxes(
-            title_text=None,
-            showgrid=True,
-            gridcolor="#D0D0D0",
-            showline=True,
-            mirror=True,
-            zeroline=False,
-            row=row,
-            col=col
-        )
+            # Display PAY as a binary track
+            pay_values = pd.to_numeric(
+                df_log[column_name],
+                errors="coerce"
+            ).fillna(0)
+
+            fig.add_trace(
+                go.Scatter(
+                    x=pay_values,
+                    y=df_log[depth_column],
+                    mode="lines",
+                    name="PAY",
+                    line=dict(
+                        color=colours["PAY"],
+                        width=2,
+                        shape="hv"
+                    ),
+                    fill="tozerox",
+                    fillcolor="rgba(211,47,47,0.30)",
+                    connectgaps=False
+                ),
+                row=1,
+                col=col
+            )
+
+            fig.update_xaxes(
+                range=[-0.05, 1.05],
+                tickvals=[0, 1],
+                ticktext=["Non-pay", "Pay"],
+                title_text="Pay Flag",
+                row=1,
+                col=col
+            )
+
+        else:
+
+            curve_values = pd.to_numeric(
+                df_log[column_name],
+                errors="coerce"
+            )
+
+            fig.add_trace(
+                go.Scatter(
+                    x=curve_values,
+                    y=df_log[depth_column],
+                    mode="lines",
+                    name=curve,
+                    line=dict(
+                        color=colours[curve],
+                        width=1.5
+                    ),
+                    connectgaps=False
+                ),
+                row=1,
+                col=col
+            )
+
+            cutoff = cutoff_values.get(curve)
+
+            if cutoff is not None:
+
+                fig.add_vline(
+                    x=cutoff,
+                    line_dash="dash",
+                    line_color="#d32f2f",
+                    line_width=2,
+                    row=1,
+                    col=col
+                )
+
+                fig.add_annotation(
+                    x=cutoff,
+                    y=1,
+                    yref="paper",
+                    text=f"Cutoff: {cutoff:.2f}",
+                    showarrow=False,
+                    textangle=-90,
+                    xanchor="left",
+                    yanchor="top",
+                    font=dict(
+                        size=9,
+                        color="#d32f2f"
+                    ),
+                    row=1,
+                    col=col
+                )
+
+            fig.update_xaxes(
+                range=[0, 1],
+                showgrid=True,
+                gridcolor="#D0D0D0",
+                showline=True,
+                mirror=True,
+                zeroline=False,
+                row=1,
+                col=col
+            )
 
         fig.update_yaxes(
             autorange="reversed",
@@ -1801,19 +1859,9 @@ def render_4track_plotly_light(df_log=None):
             showline=True,
             mirror=True,
             zeroline=False,
-            row=row,
+            row=1,
             col=col
         )
-
-    fig.update_layout(
-        height=max(850, number_of_rows * 430),
-        margin=dict(l=55, r=20, t=90, b=45),
-        paper_bgcolor="white",
-        plot_bgcolor="white",
-        showlegend=False,
-        font=dict(color="black", size=10),
-        hovermode="y"
-    )
 
     fig.update_yaxes(
         title_text="Depth (m)",
@@ -1821,7 +1869,19 @@ def render_4track_plotly_light(df_log=None):
         col=1
     )
 
+    fig.update_layout(
+        height=850,
+        margin=dict(l=65, r=30, t=100, b=50),
+        paper_bgcolor="white",
+        plot_bgcolor="white",
+        showlegend=False,
+        font=dict(color="black", size=10),
+        hovermode="y"
+    )
+
     return fig
+
+
 
 
 # ============================================================
@@ -2123,7 +2183,7 @@ with st.sidebar:
             "Maximum VSH",
             min_value=0.0,
             max_value=1.0,
-            value=0.40,
+            value=0.60,
             step=0.05
         )
 
@@ -2154,6 +2214,7 @@ with st.sidebar:
         "phit_cutoff": phit_cutoff,
         "sw_cutoff": sw_cutoff
     }
+st.session_state["PETRO_PARAMS"] = PETRO_PARAMS
 
     if st.button(
         "🗑️ Clear Current Conversation",
@@ -2325,8 +2386,7 @@ with well_col:
                         "DT": "Sonic Travel Time: measures the time taken for an acoustic wave to travel through the formation.",
                         "VSH": "Volume of Shale: estimated proportion of shale in the formation.",
                         "PHIT": "Total Porosity: estimated total pore-space fraction.",
-                        "SW": "Water Saturation: estimated fraction of pore space occupied by water.",
-                        "SH": "Hydrocarbon Saturation: estimated fraction of pore space occupied by hydrocarbons.",
+                         “SH": "Hydrocarbon Saturation: estimated fraction of pore space occupied by hydrocarbons.",
                         "PAY": "Pay Indicator: identifies intervals satisfying the selected petrophysical cut-offs."
                     }
 
@@ -3988,4 +4048,72 @@ if question:
     })
 
     st.rerun()
+
+
+: "Loaded seismic section image",
+                    "kind": "image",
+                    "image_bytes": seismic_image_bytes,
+                    "mime_type": "image/png"
+                })
+
+            except Exception as image_error:
+
+                st.warning(
+                    f"Unable to create seismic image for AI analysis: "
+                    f"{image_error}"
+                )
+
+    # --------------------------------------------------------
+    # CREATE USER MESSAGE
+    # --------------------------------------------------------
+
+    user_message = {
+        "role": "user",
+        "text": question,
+        "attachments": attachments
+    }
+
+    conversation["messages"].append(user_message)
+
+    # Set conversation title
+    if len(conversation["messages"]) == 1:
+
+        conversation["title"] = (
+            question[:35] + "..."
+            if len(question) > 35
+            else question
+        )
+
+    # --------------------------------------------------------
+    # GENERATE ORIGINAL GEMMA RESPONSE
+    # --------------------------------------------------------
+
+    with st.spinner(
+        "StrataMind is analysing your geological data..."
+    ):
+
+        try:
+
+            answer = generate_ai_response(
+                conversation["messages"],
+                selected_well
+            )
+
+        except Exception as e:
+
+            answer = (
+                "⚠️ Gemma could not complete the request.\n\n"
+                f"Error: `{e}`\n\n"
+                "Please check the model connection and "
+                "ensure the vLLM server is running."
+            )
+
+    # Save assistant response
+    conversation["messages"].append({
+        "role": "assistant",
+        "text": answer
+    })
+
+    st.rerun()
+
 
